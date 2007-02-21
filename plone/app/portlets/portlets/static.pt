@@ -1,0 +1,17 @@
+<dl class="portlet"
+    id="portlet-static"
+    i18n:domain="plone">
+    <dt class="portletHeader" >
+        <span class="portletTopLeft"></span>
+        <a href="#" 
+           class="tile"
+					 tal:condition="view/name"
+           tal:content="view/name">Portlet name</a>
+        <span class="portletTopRight"></span>
+    </dt>
+    <dd class="portletItem">
+			<span tal:replace="structure view/content">Portlet contents</span>
+      <span class="portletBottomLeft"></span>
+      <span class="portletBottomRight"></span>
+    </dd>
+</dl>

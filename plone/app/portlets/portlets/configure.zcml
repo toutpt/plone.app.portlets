@@ -74,4 +74,13 @@
         addview=".review.AddForm"
         />
 
+		<plone:portlet
+			  name="portlets.Static"
+				interface=".static.IStaticPortlet"
+				assignment=".static.Assignment"
+				renderer=".static.Renderer"
+				addview=".static.AddForm"
+				editview=".static.EditForm"
+				/>
+
 </configure>
