@@ -1,3 +1,7 @@
+<tal:comment replace="nothing">
+	This currently breaks validation of the entire site as the portlet acts as a list, and does not allow many tags, like div. Kupu is probably prone to add such things.
+		--magnon
+</tal:comment>
 <dl class="portlet"
     id="portlet-static"
     i18n:domain="plone">
