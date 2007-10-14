@@ -40,18 +40,14 @@ class Renderer(base.Renderer):
 
     render = ViewPageTemplateFile('search.pt')
 
-    def __init__(self, context, request, view, manager, data):
-        base.Renderer.__init__(self, context, request, view, manager, data)
-
-        ortal_state = getMultiAdapter((context, request), name=u'plone_context_state')
-        self.portal_url = portal_state.portal_url()
-
     def enable_livesearch(self):
         return self.data.enableLivesearch
 
     def search_form(self):
-        state=getMultiAdapter((context, request), name=u'plone_context_state')
-        return '%s/search' % state.object_url
+        state=getMultiAdapter((self.context, self.request), name=u'plone_context_state')
+        if not state.is_structural_folder():
+            state=getMultiAdapter((state.parent(), self.request), name=u'plone_context_state')
+        return '%s/@@search' % state.object_url()
 
     def search_action(self):
         return self.search_form()
