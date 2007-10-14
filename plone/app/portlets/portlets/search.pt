@@ -15,12 +15,12 @@
             tal:attributes="action view/search_action">
         <div class="LSBox">
           <input class="searchField inputLabel"
-              name="SearchableText"
+              name="term"
               type="text"
               size="15"
               title="Search Site"
               i18n:attributes="title title_search_title;"
-              tal:attributes="value request/SearchableText|nothing;
+              tal:attributes="value request/term|nothing;
                               class python:livesearch and 'inputLabel searchField portlet-search-gadget' or 'inputLabel searchField portlet-search-gadget-nols'"
               />
           <input class="searchButton"

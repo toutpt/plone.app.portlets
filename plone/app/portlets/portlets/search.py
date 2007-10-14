@@ -43,17 +43,18 @@ class Renderer(base.Renderer):
     def __init__(self, context, request, view, manager, data):
         base.Renderer.__init__(self, context, request, view, manager, data)
 
-        portal_state = getMultiAdapter((context, request), name=u'plone_portal_state')
+        ortal_state = getMultiAdapter((context, request), name=u'plone_context_state')
         self.portal_url = portal_state.portal_url()
 
     def enable_livesearch(self):
         return self.data.enableLivesearch
 
     def search_form(self):
-        return '%s/search_form' % self.portal_url
+        state=getMultiAdapter((context, request), name=u'plone_context_state')
+        return '%s/search' % state.object_url
 
     def search_action(self):
-        return '%s/search' % self.portal_url
+        return self.search_form()
 
 
 class AddForm(base.AddForm):
