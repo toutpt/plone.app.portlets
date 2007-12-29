@@ -87,7 +87,12 @@ class PortletsXMLAdapter(XMLAdapterBase):
         
         for child in node.childNodes:
             if child.nodeName.lower() == 'portletmanager':
-                manager = PortletManager()
+                managerClass = child.getAttribute('class')
+                if managerClass:
+                    manager = _resolveDottedName(managerClass)()
+                else:
+                    manager = PortletManager()
+                
                 name = str(child.getAttribute('name'))
                 
                 managerType = child.getAttribute('type')
@@ -129,6 +134,8 @@ class PortletsXMLAdapter(XMLAdapterBase):
         
         for r in portletManagerRegistrations:
             child = self._doc.createElement('portletmanager')
+            if r.component.__class__ is not PortletManager:
+                child.setAttribute('class', _getDottedName(r.component.__class__))
             child.setAttribute('name', r.name)
 
             specificInterface = providedBy(r.component).flattened().next()
