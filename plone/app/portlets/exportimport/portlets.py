@@ -1,5 +1,4 @@
 from zope.interface import implements
-from zope.interface import Interface
 from zope.interface import directlyProvides
 from zope.interface import providedBy
 
@@ -13,8 +12,6 @@ from Products.GenericSetup.interfaces import IBody
 from Products.GenericSetup.interfaces import ISetupEnviron
 
 from Products.GenericSetup.utils import XMLAdapterBase
-from Products.GenericSetup.utils import exportObjects
-from Products.GenericSetup.utils import importObjects
 from Products.GenericSetup.utils import _getDottedName
 from Products.GenericSetup.utils import _resolveDottedName
 
@@ -82,32 +79,9 @@ class PortletsXMLAdapter(XMLAdapterBase):
         registeredPortletTypes = [r.name for r in self.context.registeredUtilities()
                                     if r.provided == IPortletType]
                                         
-        registeredPortletManagers = [r.name for r in self.context.registeredUtilities()
-                                        if r.provided.isOrExtends(IPortletManager)]
-        
         for child in node.childNodes:
             if child.nodeName.lower() == 'portletmanager':
-                managerClass = child.getAttribute('class')
-                if managerClass:
-                    manager = _resolveDottedName(managerClass)()
-                else:
-                    manager = PortletManager()
-                
-                name = str(child.getAttribute('name'))
-                
-                managerType = child.getAttribute('type')
-                if managerType:
-                    directlyProvides(manager, _resolveDottedName(managerType))
-                
-                manager[USER_CATEGORY] = PortletCategoryMapping()
-                manager[GROUP_CATEGORY] = PortletCategoryMapping()
-                manager[CONTENT_TYPE_CATEGORY] = PortletCategoryMapping()
-                
-                if name not in registeredPortletManagers:
-                    self.context.registerUtility(component=manager,
-                                                 provided=IPortletManager,
-                                                 name=name)
-                                                 
+                self._initPortletManagerNode(child)
             elif child.nodeName.lower() == 'portlet':
                 addview = str(child.getAttribute('addview'))
                 if addview not in registeredPortletTypes:
@@ -124,6 +98,31 @@ class PortletsXMLAdapter(XMLAdapterBase):
                                                  provided=IPortletType, 
                                                  name=addview)
     
+    def _initPortletManagerNode(self, node):
+        registeredPortletManagers = [r.name for r in self.context.registeredUtilities()
+                                        if r.provided.isOrExtends(IPortletManager)]
+
+        managerClass = node.getAttribute('class')
+        if managerClass:
+            manager = _resolveDottedName(managerClass)()
+        else:
+            manager = PortletManager()
+        
+        name = str(node.getAttribute('name'))
+        
+        managerType = node.getAttribute('type')
+        if managerType:
+             directlyProvides(manager, _resolveDottedName(managerType))
+        
+        manager[USER_CATEGORY] = PortletCategoryMapping()
+        manager[GROUP_CATEGORY] = PortletCategoryMapping()
+        manager[CONTENT_TYPE_CATEGORY] = PortletCategoryMapping()
+        
+        if name not in registeredPortletManagers:
+            self.context.registerUtility(component=manager,
+                                         provided=IPortletManager,
+                                         name=name)
+    
     def _extractPortlets(self):
         fragment = self._doc.createDocumentFragment()
         
@@ -133,17 +132,8 @@ class PortletsXMLAdapter(XMLAdapterBase):
                                             if r.provided.isOrExtends(IPortletManager)]
         
         for r in portletManagerRegistrations:
-            child = self._doc.createElement('portletmanager')
-            if r.component.__class__ is not PortletManager:
-                child.setAttribute('class', _getDottedName(r.component.__class__))
-            child.setAttribute('name', r.name)
+            fragment.appendChild(self._extractPortletManagerNode(r))
 
-            specificInterface = providedBy(r.component).flattened().next()
-            if specificInterface != IPortletManager:
-                child.setAttribute('type', _getDottedName(specificInterface))
-            
-            fragment.appendChild(child)
-            
         for name, portletType in getUtilitiesFor(IPortletType):
             if name in registeredPortletTypes:
                 child = self._doc.createElement('portlet')
@@ -155,6 +145,20 @@ class PortletsXMLAdapter(XMLAdapterBase):
                     child.setAttribute('for', _getDottedName(portletType.for_))
 
         return fragment
+    
+    def _extractPortletManagerNode(self, portletManagerRegistration):
+        r = portletManagerRegistration
+        child = self._doc.createElement('portletmanager')
+        if r.component.__class__ is not PortletManager:
+            child.setAttribute('class', _getDottedName(r.component.__class__
+))
+        child.setAttribute('name', r.name)
+        
+        specificInterface = providedBy(r.component).flattened().next()
+        if specificInterface != IPortletManager:
+            child.setAttribute('type', _getDottedName(specificInterface))
+        
+        return child
 
 def importPortlets(context):
     """Import portlet managers and portlets
