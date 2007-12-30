@@ -42,28 +42,25 @@ class TestImportPortletManagers(PortletsExportImportTestCase):
         node = parseString(_XML_BASIC).documentElement
         self.importer._initPortletManagerNode(node)
 
-        results = self._searchPortletManagerRegistrations('plone.foo_column')
-        self.assertNotEqual([], results)
-        r = results[0]
-        self.assertEqual(PortletManager, r.component.__class__)
+        manager = queryUtility(IPortletManager, name='plone.foo_column')
+        self.failUnless(manager is not None)
+        self.assertEqual(PortletManager, manager.__class__)
     
     def test_initPortletManagerNode_customType(self):
         node = parseString(_XML_CUSTOM_TYPE).documentElement
         self.importer._initPortletManagerNode(node)
 
-        results = self._searchPortletManagerRegistrations('plone.foo_column')
-        self.assertNotEqual([], results) 
-        r = results[0]
-        self.failUnless(IColumn.providedBy(r.component))
+        manager = queryUtility(IPortletManager, name='plone.foo_column')
+        self.failUnless(manager is not None)
+        self.failUnless(IColumn.providedBy(manager))
     
     def test_initPortletManagerNode_customClass(self):
         node = parseString(_XML_CUSTOM_CLASS).documentElement
         self.importer._initPortletManagerNode(node)
 
-        results = self._searchPortletManagerRegistrations('plone.foo_column')
-        self.assertNotEqual([], results) 
-        r = results[0]
-        self.assertEqual(FooPortletManager, r.component.__class__)
+        manager = queryUtility(IPortletManager, name='plone.foo_column')
+        self.failUnless(manager is not None)
+        self.assertEqual(FooPortletManager, manager.__class__)
     
 
 class TestExportPortletManagers(PortletsExportImportTestCase):
