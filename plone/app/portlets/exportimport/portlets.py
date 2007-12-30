@@ -126,21 +126,24 @@ class PortletsXMLAdapter(XMLAdapterBase):
             
         for name, portletType in getUtilitiesFor(IPortletType):
             if name in registeredPortletTypes:
-                child = self._doc.createElement('portlet')
-                child.setAttribute('addview', portletType.addview)
-                child.setAttribute('title', portletType.title)
-                child.setAttribute('description', portletType.description)
-                
-                if portletType.for_ and portletType.for_ != []:
-                    for i in portletType.for_:
-                        subNode = self._doc.createElement('for')
-                        subNode.setAttribute('interface',
-                          _getDottedName(i))
-                        child.appendChild(subNode)
-                
-                fragment.appendChild(child)
+                fragment.appendChild(self._extractPortletNode(name,
+                  portletType))
         
         return fragment
+    
+    def _extractPortletNode(self, name, portletType):
+        child = self._doc.createElement('portlet')
+        child.setAttribute('addview', portletType.addview)
+        child.setAttribute('title', portletType.title)
+        child.setAttribute('description', portletType.description)
+        
+        if portletType.for_ and portletType.for_ != [Interface]:
+            for i in portletType.for_:
+                subNode = self._doc.createElement('for')
+                subNode.setAttribute('interface',
+                  _getDottedName(i))
+                child.appendChild(subNode)
+        return child
     
     def _removePortlet(self, name):
         if queryUtility(IPortletType, name=name):

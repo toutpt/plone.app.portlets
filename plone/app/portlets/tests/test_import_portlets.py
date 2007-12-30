@@ -76,25 +76,29 @@ class TestImportPortlets(PortletsTestCase):
     def test_initPortletNode_defaultManagerInterface(self):
         node = parseString(_TEST_PORTLET_IMPORT_7).documentElement
         self.importer._initPortletNode(node)
-        portlet = queryUtility(IPortletType, name="portlets.New2")
+        portlet = queryUtility(IPortletType, name="portlets.New")
         self.failUnless(portlet is not None)
         self.assertEqual([Interface], portlet.for_)
     
     def test_initPortletNode_extend(self):
-        node = parseString(_TEST_PORTLET_IMPORT_8).documentElement
+        node = parseString(_TEST_PORTLET_IMPORT_8a).documentElement
         self.importer._initPortletNode(node)
-        portlet = queryUtility(IPortletType, name="portlets.Login")
+        node = parseString(_TEST_PORTLET_IMPORT_8b).documentElement
+        self.importer._initPortletNode(node) 
+        portlet = queryUtility(IPortletType, name="portlets.New")
         self.failUnless(portlet is not None)
         self.assertEqual([IDashboard], portlet.for_)
     
     def test_initPortletNode_purge(self):
-        node = parseString(_TEST_PORTLET_IMPORT_9).documentElement
+        node = parseString(_TEST_PORTLET_IMPORT_9a).documentElement
         self.importer._initPortletNode(node)
-        portlet = queryUtility(IPortletType, name="portlets.Calendar")
+        node = parseString(_TEST_PORTLET_IMPORT_9b).documentElement
+        self.importer._initPortletNode(node)
+        portlet = queryUtility(IPortletType, name="portlets.New")
         self.failUnless(portlet is not None)
         self.assertEqual([IColumn], portlet.for_)
-        self.assertEqual('Foo', portlet.title)
-        self.assertEqual('Foo', portlet.description)
+        self.assertEqual('Bar', portlet.title)
+        self.assertEqual('Bar', portlet.description)
 
 def test_suite():
     from unittest import TestSuite, makeSuite
@@ -133,18 +137,30 @@ _TEST_PORTLET_IMPORT_6 = """<?xml version="1.0"?>
 """
 
 _TEST_PORTLET_IMPORT_7 = """<?xml version="1.0"?>
-<portlet addview="portlets.New2" title="Foo" description="Foo" />
+<portlet addview="portlets.New" title="Foo" description="Foo" />
 """
 
-_TEST_PORTLET_IMPORT_8 = """<?xml version="1.0"?>
-<portlet addview="portlets.Login" extend="">
+_TEST_PORTLET_IMPORT_8a = """<?xml version="1.0"?>
+<portlet addview="portlets.New" title="Foo" description="Foo">
+  <for interface="plone.app.portlets.interfaces.IColumn" />
+</portlet>
+"""
+
+_TEST_PORTLET_IMPORT_8b = """<?xml version="1.0"?>
+<portlet addview="portlets.New" extend="">
   <for interface="plone.app.portlets.interfaces.IColumn" remove="" />
   <for interface="plone.app.portlets.interfaces.IDashboard" />
 </portlet>
 """
 
-_TEST_PORTLET_IMPORT_9 = """<?xml version="1.0"?>
-<portlet addview="portlets.Calendar" purge="" title="Foo" description="Foo">
+_TEST_PORTLET_IMPORT_9a = """<?xml version="1.0"?>
+<portlet addview="portlets.New" title="Foo" description="Foo">
+  <for interface="plone.app.portlets.interfaces.IDahsboard" />
+</portlet>
+"""
+
+_TEST_PORTLET_IMPORT_9b = """<?xml version="1.0"?>
+<portlet addview="portlets.New" purge="" title="Bar" description="Bar">
   <for interface="plone.app.portlets.interfaces.IColumn" />
 </portlet>
 """
