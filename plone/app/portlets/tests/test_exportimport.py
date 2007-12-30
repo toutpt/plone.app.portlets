@@ -2,6 +2,7 @@ from StringIO import StringIO
 
 from zope.app.component.hooks import setSite, setHooks
 from zope.component import getSiteManager
+from zope.component import queryUtility
 
 from xml.dom.minidom import parseString
 
