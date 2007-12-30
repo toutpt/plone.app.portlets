@@ -24,15 +24,13 @@ class TestPortlet(PortletsTestCase):
     def testPortletTypeRegistered(self):
         portlet = getUtility(IPortletType, name='portlets.Calendar')
         self.assertEquals(portlet.addview, 'portlets.Calendar')
-
+    
     def testRegisteredInterfaces(self):
         portlet = getUtility(IPortletType, name='portlets.Calendar')
         registered_interfaces = [_getDottedName(i) for i in portlet.for_]
         registered_interfaces.sort()
-        self.assertEquals(['plone.app.portlets.interfaces.IColumn',
-          'plone.app.portlets.interfaces.IDashboard'],
-          registered_interfaces)
-
+        self.assertEquals([], registered_interfaces)
+    
     def testInterfaces(self):
         portlet = calendar.Assignment()
         self.failUnless(IPortletAssignment.providedBy(portlet))

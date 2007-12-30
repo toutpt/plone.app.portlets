@@ -29,9 +29,7 @@ class TestPortlet(PortletsTestCase):
         portlet = getUtility(IPortletType, name='portlets.rss')
         registered_interfaces = [_getDottedName(i) for i in portlet.for_] 
         registered_interfaces.sort() 
-        self.assertEquals(['plone.app.portlets.interfaces.IColumn',
-          'plone.app.portlets.interfaces.IDashboard'],
-          registered_interfaces)
+        self.assertEquals([], registered_interfaces)
 
     def testInterfaces(self):
         portlet = rss.Assignment()

@@ -23,7 +23,7 @@ class TestExportPortlets(PortletsTestCase):
           PortletsXMLAdapter(sm, DummySetupEnviron())
     
     def test_extractPortletNode(self):
-        node = parseString(_TEST_PORTLET_IMPORT_1).documentElement
+        node = parseString(_XML_MULTIPLE_INTERFACES).documentElement
         self.importer._initPortletNode(node)
         portlet = getUtility(IPortletType, 'portlets.New')
         node = self.exporter._extractPortletNode('portlets.New', portlet)
@@ -31,7 +31,16 @@ class TestExportPortlets(PortletsTestCase):
         node.writexml(file)
         file.seek(0)
         self.assertEqual("""<portlet title="Foo" addview="portlets.New" description="Foo"><for interface="plone.app.portlets.interfaces.IColumn"/><for interface="plone.app.portlets.interfaces.IDashboard"/></portlet>""", file.read())
-
+    
+    def test_extractPortletNode_defaultManagerInterface(self):
+        node = parseString(_XML_DEFAULT_INTERFACE).documentElement
+        self.importer._initPortletNode(node)
+        portlet = getUtility(IPortletType, 'portlets.New')
+        node = self.exporter._extractPortletNode('portlets.New', portlet)
+        file = StringIO()
+        node.writexml(file)
+        file.seek(0)
+        self.assertEqual("""<portlet title="Foo" addview="portlets.New" description="Foo"/>""", file.read())
 
 def test_suite():
     from unittest import TestSuite, makeSuite
@@ -39,9 +48,13 @@ def test_suite():
     suite.addTest(makeSuite(TestExportPortlets))
     return suite
 
-_TEST_PORTLET_IMPORT_1 = """<?xml version="1.0"?>
+_XML_MULTIPLE_INTERFACES = """<?xml version="1.0"?> 
 <portlet addview="portlets.New" title="Foo" description="Foo">
   <for interface="plone.app.portlets.interfaces.IColumn" />
   <for interface="plone.app.portlets.interfaces.IDashboard" />
 </portlet>
+"""
+
+_XML_DEFAULT_INTERFACE = """<?xml version="1.0"?>
+<portlet addview="portlets.New" title="Foo" description="Foo" />
 """
