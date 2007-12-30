@@ -150,8 +150,7 @@ class PortletsXMLAdapter(XMLAdapterBase):
         r = portletManagerRegistration
         child = self._doc.createElement('portletmanager')
         if r.component.__class__ is not PortletManager:
-            child.setAttribute('class', _getDottedName(r.component.__class__
-))
+            child.setAttribute('class', _getDottedName(r.component.__class__))
         child.setAttribute('name', r.name)
         
         specificInterface = providedBy(r.component).flattened().next()
