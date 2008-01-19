@@ -103,18 +103,28 @@ class EditPortletManagerRenderer(Explicit):
             
             portlet_hash = hashPortletInfo(dict(manager=manager_name, category=category, 
                                                 key=key, name=name,))
-            
+            column = 'plone.dashboard1'
             data.append( {'title'      : assignments[idx].title,
                           'editview'   : editviewName,
                           'hash'       : portlet_hash,
+                          'has_left'   : self.has_left(column),
+                          'has_right'  : self.has_right(column),
                           'up_url'     : '%s/@@move-portlet-up?name=%s' % (baseUrl, name),
                           'down_url'   : '%s/@@move-portlet-down?name=%s' % (baseUrl, name),
+                          'left_url'   : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, column),
+                          'right_url'  : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, column),
                           'delete_url' : '%s/@@delete-portlet?name=%s' % (baseUrl, name),
                           })
         if len(data) > 0:
             data[0]['up_url'] = data[-1]['down_url'] = None
         return data
         
+    def has_left(self, column):
+        return True
+
+    def has_right(self, column):
+        return True
+
     def addable_portlets(self):
         baseUrl = self.baseUrl()
         addviewbase = baseUrl.replace(self.context_url(), '')
@@ -233,3 +243,10 @@ class ManagePortletAssignments(BrowserView):
             url = str(getMultiAdapter((context, self.request), name=u"absolute_url"))    
             referer = '%s/@@manage-portlets' % (url,)
         return referer
+        
+class ManageColumnAssignments(BrowserView):
+
+    def move_portlet_to_column(self, name, column):
+        # here we need to remove the assignment for the dragsource and add it
+        # in the column in which it is dropped.
+        pass

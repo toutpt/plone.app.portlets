@@ -140,8 +140,18 @@
         name="move-portlet-down"
         attribute="move_portlet_down"
         />
-        
+
     </browser:pages>
+
+    <!-- Operations on columns when in edit mode -->
+    <browser:page
+      name="move-portlet-to-column"
+      for="plone.portlets.interfaces.IPortletAssignmentMapping"
+      class=".editmanager.ManageColumnAssignments"
+      attribute="move_portlet_to_column"
+      permission="plone.app.portlets.ManagePortlets"
+      />
+
 
     <!-- Adding view for portlet assignments -->
     <browser:view
