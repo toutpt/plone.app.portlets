@@ -35,11 +35,11 @@ class TestProductInstall(PortletsTestCase):
             cmanager = getUtility(IColumnManager,c)
             if c == 'plone.portlet':
                 self.assertEqual(['plone.leftcolumn', 'plone.rightcolumn'],
-                                 cmanager.list_columns())
+                                 list(cmanager))
             if c == 'plone.dashboard':
                 self.assertEqual(['plone.dashboard1', 'plone.dashboard2',
                                   'plone.dashboard3', 'plone.dashboard4'],
-                                  cmanager.list_columns())        
+                                  list(cmanager))        
 
     def testInterfaces(self):
         left = getUtility(IPortletManager, 'plone.leftcolumn')
