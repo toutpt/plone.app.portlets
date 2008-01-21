@@ -24,7 +24,7 @@ def new_user(principal, event):
     userid = principal.getId()
     portlets = defaults()
     dashboard = queryUtility(IColumnManager, 'plone.dashboard')
-    for name in dashboard.list_columns():
+    for name in dashboard:
         assignments = portlets.get(name)
         if assignments:
             column = queryUtility(IPortletManager, name=name)
