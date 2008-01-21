@@ -4,15 +4,17 @@ from zope.interface import implements, Interface
 from zope.component import adapts, getMultiAdapter, queryMultiAdapter, queryUtility
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.contentprovider.interfaces import UpdateNotCalled
+from zope.app.container.interfaces import INameChooser
 
 from plone.memoize.view import memoize
 from plone.portlets.interfaces import IPortletManager
 from plone.portlets.interfaces import IColumnManager
 from plone.portlets.interfaces import IPortletManagerRenderer
 from plone.portlets.interfaces import ILocalPortletAssignmentManager
-from plone.portlets.interfaces import IColumnManager
+from plone.portlets.interfaces import IPortletAssignmentMapping
 from plone.portlets.constants import CONTEXT_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
+from plone.portlets.constants import USER_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
 from plone.portlets.utils import hashPortletInfo
 from plone.app.portlets.interfaces import IDashboard, IPortletPermissionChecker
@@ -20,6 +22,7 @@ from plone.app.portlets.browser.interfaces import IManageColumnPortletsView
 from plone.app.portlets.browser.interfaces import IManageContextualPortletsView
 from plone.app.portlets.browser.interfaces import IManageDashboardPortletsView
 
+from Products.CMFCore.utils import getToolByName
 from Products.Five.browser import BrowserView 
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.PythonScripts.standard import url_quote
@@ -93,23 +96,13 @@ class EditPortletManagerRenderer(Explicit):
                           'hash'       : portlet_hash,
                           'up_url'     : '%s/@@move-portlet-up?name=%s' % (baseUrl, name),
                           'down_url'   : '%s/@@move-portlet-down?name=%s' % (baseUrl, name),
-                          'left_url'   : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, left_column),
+                          'left_url'   : left_column and'%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, left_column),
                           'right_url'  : right_column and '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, right_column),
-                          'delete_url' : left_column and '%s/@@delete-portlet?name=%s' % (baseUrl, name),
+                          'delete_url' : '%s/@@delete-portlet?name=%s' % (baseUrl, name),
                           })
         if len(data) > 0:
             data[0]['up_url'] = data[-1]['down_url'] = None
         return data
-        
-    def has_left(self, column):
-        if column == 'plone.leftcolumn':
-            return False
-        return True
-
-    def has_right(self, column):
-        if column == 'plone.rightcolumn':
-            return False
-        return True
 
     def addable_portlets(self):
         baseUrl = self.baseUrl()
@@ -208,9 +201,9 @@ class DashboardEditPortletManagerRenderer(EditPortletManagerRenderer):
                           'hash'       : portlet_hash,
                           'up_url'     : '%s/@@move-portlet-up?name=%s' % (baseUrl, name),
                           'down_url'   : '%s/@@move-portlet-down?name=%s' % (baseUrl, name),
-                          'left_url'   : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, left_column),
+                          'left_url'   : left_column and '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, left_column),
                           'right_url'  : right_column and '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, right_column),
-                          'delete_url' : left_column and '%s/@@delete-portlet?name=%s' % (baseUrl, name),
+                          'delete_url' : '%s/@@delete-portlet?name=%s' % (baseUrl, name),
                           })
         if len(data) > 0:
             data[0]['up_url'] = data[-1]['down_url'] = None
@@ -273,10 +266,31 @@ class ManageColumnAssignments(BrowserView):
     def move_portlet_to_column(self, name, column):
         assignments = aq_inner(self.context)
         IPortletPermissionChecker(assignments)()
+        moving_assignment = assignments[name]
+        del assignments[name]
         
-        keys = list(assignments.keys())
+        manager = None
+        # Let's check if we are dealing with a USER_CATEGORY PortletManager
+        portletmanager = queryUtility(IPortletManager, column)
+        if portletmanager is not None:
+            category = portletmanager.get(USER_CATEGORY, None)
+            if category is not None:
+                portal_membership = getToolByName(self.context, 'portal_membership')
+                userid = portal_membership.getAuthenticatedMember().getId()
+                manager = category.get(userid, None)
+        if manager is None:
+            # Maybe we are dealing with default plone portlets 
+            manager = getMultiAdapter((aq_parent(aq_inner(self.context)),
+                                       portletmanager), IPortletAssignmentMapping)
+        chooser = INameChooser(manager)
+        manager[chooser.chooseName(None, moving_assignment)] = moving_assignment
+        self.request.response.redirect(self._nextUrl())
+        return ''
         
-        idx = keys.index(name)
-        keys.remove(name)
-        assignments.updateOrder(keys)
-        column = queryUtility(IPortletManager, column)
+    def _nextUrl(self):
+        referer = self.request.get('referer')
+        if not referer:
+            context = aq_parent(aq_inner(self.context))
+            url = str(getMultiAdapter((context, self.request), name=u"absolute_url"))    
+            referer = '%s/@@manage-portlets' % (url,)
+        return referer
