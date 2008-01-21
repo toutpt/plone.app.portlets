@@ -2,6 +2,7 @@ from zope.app.component.hooks import setSite, setHooks
 from zope.component import getSiteManager, getUtilitiesFor, getUtility
 
 from plone.portlets.interfaces import IPortletManager
+from plone.portlets.interfaces import IColumnManager
 from plone.portlets.interfaces import ILocalPortletAssignable
 from plone.portlets.interfaces import IPortletType
 
@@ -19,8 +20,26 @@ class TestProductInstall(PortletsTestCase):
         sm = getSiteManager(self.portal)
         registrations = [r.name for r in sm.registeredUtilities()
                             if IPortletManager == r.provided]
-        self.assertEquals(['plone.dashboard1', 'plone.dashboard2', 'plone.dashboard3', 'plone.dashboard4',
-                           'plone.leftcolumn', 'plone.rightcolumn'], sorted(registrations))
+        self.assertEquals(['plone.dashboard1', 'plone.dashboard2',
+                           'plone.dashboard3', 'plone.dashboard4',
+                           'plone.leftcolumn', 'plone.rightcolumn'],
+                           sorted(registrations))
+
+    def testColumnManagersRegistered(self):
+        sm = getSiteManager(self.portal)
+        registrations = [r.name for r in sm.registeredUtilities()
+                            if IColumnManager == r.provided]
+        self.assertEquals(['plone.dashboard', 'plone.portlets'],
+                          sorted(registrations))
+        for c in registrations:
+            cmanager = getUtility(IColumnManager,c)
+            if c == 'plone.portlet':
+                self.assertEqual(['plone.leftcolumn', 'plone.rightcolumn'],
+                                 cmanager.list_columns())
+            if c == 'plone.dashboard':
+                self.assertEqual(['plone.dashboard1', 'plone.dashboard2',
+                                  'plone.dashboard3', 'plone.dashboard4'],
+                                  cmanager.list_columns())        
 
     def testInterfaces(self):
         left = getUtility(IPortletManager, 'plone.leftcolumn')

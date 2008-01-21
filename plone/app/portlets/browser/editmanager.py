@@ -1,47 +1,29 @@
-import urllib
-
 from Acquisition import Explicit, aq_parent, aq_inner
-from ZODB.POSException import ConflictError
 
 from zope.interface import implements, Interface
-from zope.component import adapts, getMultiAdapter, queryMultiAdapter, getUtilitiesFor
-
-from zope.annotation.interfaces import IAnnotations
-
-from zope.publisher.interfaces.http import IHTTPRequest
+from zope.component import adapts, getMultiAdapter, queryMultiAdapter, queryUtility
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
-
 from zope.contentprovider.interfaces import UpdateNotCalled
 
 from plone.memoize.view import memoize
-
-from plone.portlets.interfaces import IPortletRetriever
 from plone.portlets.interfaces import IPortletManager
+from plone.portlets.interfaces import IColumnManager
 from plone.portlets.interfaces import IPortletManagerRenderer
-from plone.portlets.interfaces import IPortletRenderer
-from plone.portlets.interfaces import ILocalPortletAssignable
-from plone.portlets.interfaces import IPortletAssignmentMapping
 from plone.portlets.interfaces import ILocalPortletAssignmentManager
-
-from plone.portlets.constants import CONTEXT_ASSIGNMENT_KEY
-
+from plone.portlets.interfaces import IColumnManager
 from plone.portlets.constants import CONTEXT_CATEGORY
-from plone.portlets.constants import USER_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
-
+from plone.portlets.utils import hashPortletInfo
 from plone.app.portlets.interfaces import IDashboard, IPortletPermissionChecker
-
 from plone.app.portlets.browser.interfaces import IManageColumnPortletsView
 from plone.app.portlets.browser.interfaces import IManageContextualPortletsView
 from plone.app.portlets.browser.interfaces import IManageDashboardPortletsView
 
 from Products.Five.browser import BrowserView 
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-
 from Products.PythonScripts.standard import url_quote
 
-from plone.portlets.utils import hashPortletInfo
 
 class EditPortletManagerRenderer(Explicit):
     """Render a portlet manager in edit mode.
@@ -103,26 +85,30 @@ class EditPortletManagerRenderer(Explicit):
             
             portlet_hash = hashPortletInfo(dict(manager=manager_name, category=category, 
                                                 key=key, name=name,))
-            column = 'plone.dashboard1'
+            columnmanager = queryUtility(IColumnManager, name='plone.portlets')
+            left_column = columnmanager.left(manager_name)
+            right_column = columnmanager.right(manager_name)
             data.append( {'title'      : assignments[idx].title,
                           'editview'   : editviewName,
                           'hash'       : portlet_hash,
-                          'has_left'   : self.has_left(column),
-                          'has_right'  : self.has_right(column),
                           'up_url'     : '%s/@@move-portlet-up?name=%s' % (baseUrl, name),
                           'down_url'   : '%s/@@move-portlet-down?name=%s' % (baseUrl, name),
-                          'left_url'   : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, column),
-                          'right_url'  : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, column),
-                          'delete_url' : '%s/@@delete-portlet?name=%s' % (baseUrl, name),
+                          'left_url'   : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, left_column),
+                          'right_url'  : right_column and '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, right_column),
+                          'delete_url' : left_column and '%s/@@delete-portlet?name=%s' % (baseUrl, name),
                           })
         if len(data) > 0:
             data[0]['up_url'] = data[-1]['down_url'] = None
         return data
         
     def has_left(self, column):
+        if column == 'plone.leftcolumn':
+            return False
         return True
 
     def has_right(self, column):
+        if column == 'plone.rightcolumn':
+            return False
         return True
 
     def addable_portlets(self):
@@ -193,6 +179,42 @@ class DashboardEditPortletManagerRenderer(EditPortletManagerRenderer):
     """Render a portlet manager in edit mode for the dashboard
     """
     adapts(Interface, IDefaultBrowserLayer, IManageDashboardPortletsView, IDashboard)
+
+    def portlets(self):
+        baseUrl = self.baseUrl()
+        assignments = self._lazyLoadAssignments(self.manager)
+        data = []
+
+        manager_name = self.manager.__name__
+        category = self.__parent__.category
+        key = self.__parent__.key
+
+        for idx in range(len(assignments)):
+            name = assignments[idx].__name__
+
+            editview = queryMultiAdapter((assignments[idx], self.request), name='edit', default=None)
+            if editview is None:
+                editviewName = ''
+            else:
+                editviewName = '%s/%s/edit' % (baseUrl, name)
+
+            portlet_hash = hashPortletInfo(dict(manager=manager_name, category=category, 
+                                                key=key, name=name,))
+            columnmanager = queryUtility(IColumnManager, name='plone.dashboard')
+            left_column = columnmanager.left(manager_name)
+            right_column = columnmanager.right(manager_name)
+            data.append( {'title'      : assignments[idx].title,
+                          'editview'   : editviewName,
+                          'hash'       : portlet_hash,
+                          'up_url'     : '%s/@@move-portlet-up?name=%s' % (baseUrl, name),
+                          'down_url'   : '%s/@@move-portlet-down?name=%s' % (baseUrl, name),
+                          'left_url'   : '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, left_column),
+                          'right_url'  : right_column and '%s/@@move-portlet-to-column?name=%s&column=%s' % (baseUrl, name, right_column),
+                          'delete_url' : left_column and '%s/@@delete-portlet?name=%s' % (baseUrl, name),
+                          })
+        if len(data) > 0:
+            data[0]['up_url'] = data[-1]['down_url'] = None
+        return data
         
 class ManagePortletAssignments(BrowserView):
     """Utility views for managing portlets for a particular column
@@ -243,10 +265,18 @@ class ManagePortletAssignments(BrowserView):
             url = str(getMultiAdapter((context, self.request), name=u"absolute_url"))    
             referer = '%s/@@manage-portlets' % (url,)
         return referer
-        
-class ManageColumnAssignments(BrowserView):
 
+
+class ManageColumnAssignments(BrowserView):
+    """Utility views for managing portlets for a particular column
+    """
     def move_portlet_to_column(self, name, column):
-        # here we need to remove the assignment for the dragsource and add it
-        # in the column in which it is dropped.
-        pass
+        assignments = aq_inner(self.context)
+        IPortletPermissionChecker(assignments)()
+        
+        keys = list(assignments.keys())
+        
+        idx = keys.index(name)
+        keys.remove(name)
+        assignments.updateOrder(keys)
+        column = queryUtility(IPortletManager, column)

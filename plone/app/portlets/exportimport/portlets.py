@@ -5,6 +5,7 @@ from zope.interface import providedBy
 
 from zope.component import adapts
 from zope.component import getSiteManager
+from zope.component import queryUtility
 from zope.component import getUtilitiesFor
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import IComponentRegistry
@@ -20,10 +21,13 @@ from Products.GenericSetup.utils import _resolveDottedName
 
 from plone.portlets.interfaces import IPortletType
 from plone.portlets.interfaces import IPortletManager
+from plone.portlets.interfaces import IColumnManager
+
 
 from plone.portlets.constants import USER_CATEGORY, GROUP_CATEGORY, CONTENT_TYPE_CATEGORY
 
 from plone.portlets.manager import PortletManager
+from plone.portlets.columns import ColumnManager
 from plone.portlets.storage import PortletCategoryMapping
 from plone.portlets.registration import PortletType
 
@@ -84,24 +88,39 @@ class PortletsXMLAdapter(XMLAdapterBase):
                                         
         registeredPortletManagers = [r.name for r in self.context.registeredUtilities()
                                         if r.provided.isOrExtends(IPortletManager)]
+        registeredColumnManagers = [r.name for r in self.context.registeredUtilities()
+                                        if r.provided.isOrExtends(IColumnManager)]
         
+        #first iterate over the toplevel nodes
         for child in node.childNodes:
-            if child.nodeName.lower() == 'portletmanager':
-                manager = PortletManager()
-                name = str(child.getAttribute('name'))
+            if child.nodeName.lower() == 'columnmanager':
+                # Register ColumnManagers 
+                cmanager = ColumnManager()
+                cname = str(child.getAttribute('name'))
+                # Iterate over the nodes inside a columnmanager
+                for grandchild in child.childNodes:
+                    if grandchild.nodeName.lower() == 'portletmanager':
+                        manager = PortletManager()
+                        name = str(grandchild.getAttribute('name'))
                 
-                managerType = child.getAttribute('type')
-                if managerType:
-                    directlyProvides(manager, _resolveDottedName(managerType))
+                        managerType = grandchild.getAttribute('type')
+                        if managerType:
+                            directlyProvides(manager, _resolveDottedName(managerType))
                 
-                manager[USER_CATEGORY] = PortletCategoryMapping()
-                manager[GROUP_CATEGORY] = PortletCategoryMapping()
-                manager[CONTENT_TYPE_CATEGORY] = PortletCategoryMapping()
+                        manager[USER_CATEGORY] = PortletCategoryMapping()
+                        manager[GROUP_CATEGORY] = PortletCategoryMapping()  
+                        manager[CONTENT_TYPE_CATEGORY] = PortletCategoryMapping()
                 
-                if name not in registeredPortletManagers:
-                    self.context.registerUtility(component=manager,
-                                                 provided=IPortletManager,
-                                                 name=name)
+                        if name not in registeredPortletManagers:
+                            self.context.registerUtility(component=manager,
+                                                         provided=IPortletManager,
+                                                         name=name)
+                            # And add this portletmanager to the columnmanager
+                            cmanager.append(name)
+                if cname not in registeredColumnManagers:
+                    self.context.registerUtility(component=cmanager,
+                                                     provided=IColumnManager,
+                                                     name=cname)
                                                  
             elif child.nodeName.lower() == 'portlet':
                 addview = str(child.getAttribute('addview'))
@@ -126,15 +145,20 @@ class PortletsXMLAdapter(XMLAdapterBase):
                                             if r.provided == IPortletType]
         portletManagerRegistrations = [r for r in self.context.registeredUtilities()
                                             if r.provided.isOrExtends(IPortletManager)]
-        
-        for r in portletManagerRegistrations:
-            child = self._doc.createElement('portletmanager')
-            child.setAttribute('name', r.name)
-
-            specificInterface = providedBy(r.component).flattened().next()
-            if specificInterface != IPortletManager:
-                child.setAttribute('type', _getDottedName(specificInterface))
-            
+        columnManagerRegistrations = [r for r in self.context.registeredUtilities()
+                                            if r.provided.isOrExtends(IColumnManager)]
+        for c in columnManagerRegistrations:
+            child = self._doc.createElement('columnmanager')
+            child.setAttribute('name', c.name)
+            portletmanagers = queryUtility(IColumnManager,c.name).list_columns()
+            for r in portletManagerRegistrations:
+                if r.name in portletmanagers:
+                    grandchild = self._doc.createElement('portletmanager')
+                    grandchild.setAttribute('name', r.name)
+                    specificInterface = providedBy(r.component).flattened().next()
+                    if specificInterface != IPortletManager:
+                        grandchild.setAttribute('type', _getDottedName(specificInterface))
+                    child.appendChild(grandchild)
             fragment.appendChild(child)
             
         for name, portletType in getUtilitiesFor(IPortletType):
@@ -146,6 +170,7 @@ class PortletsXMLAdapter(XMLAdapterBase):
                 
                 if portletType.for_:
                     child.setAttribute('for', _getDottedName(portletType.for_))
+                fragment.appendChild(child)
 
         return fragment
 

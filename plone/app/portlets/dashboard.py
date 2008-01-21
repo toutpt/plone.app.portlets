@@ -6,6 +6,7 @@ from zope.app.container.interfaces import INameChooser
 from Products.PluggableAuthService.interfaces.authservice import IPropertiedUser
 
 from plone.portlets.interfaces import IPortletManager
+from plone.portlets.interfaces import IColumnManager
 from plone.portlets.constants import USER_CATEGORY
 
 from plone.app.portlets.interfaces import IDefaultDashboard
@@ -22,7 +23,8 @@ def new_user(principal, event):
     
     userid = principal.getId()
     portlets = defaults()
-    for name in ('plone.dashboard1', 'plone.dashboard2', 'plone.dashboard3', 'plone.dashboard4'):
+    dashboard = queryUtility(IColumnManager, 'plone.dashboard')
+    for name in dashboard.list_columns():
         assignments = portlets.get(name)
         if assignments:
             column = queryUtility(IPortletManager, name=name)
