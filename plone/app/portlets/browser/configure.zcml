@@ -140,6 +140,11 @@
         name="move-portlet-down"
         attribute="move_portlet_down"
         />
+        
+      <browser:page
+        name="update-portlet-order"
+        attribute="update_portlet_order"
+        />
 
     </browser:pages>
 
@@ -205,26 +210,19 @@
     <!-- KSS actions -->
     <browser:page
         for="*"
-        name="inlineMovePortletUp"
-        class=".kss.PortletManagerKSS"
-        attribute="move_portlet_up"
-        permission="plone.app.portlets.ManageOwnPortlets"
-        />
-    <browser:page
-        for="*"
-        name="inlineMovePortletDown"
-        class=".kss.PortletManagerKSS"
-        attribute="move_portlet_down"
-        permission="plone.app.portlets.ManageOwnPortlets"
-        />
-    <browser:page
-        for="*"
         name="inlineDeletePortlet"
         class=".kss.PortletManagerKSS"
         attribute="delete_portlet"
         permission="plone.app.portlets.ManageOwnPortlets"
         />
-      
+    <browser:page
+        for="*"
+        name="dropPortlet"
+        class=".kss.DragDropManagerKSS"
+        attribute="drop_portlet"
+        permission="plone.app.portlets.ManageOwnPortlets"
+        />
+    
     <!-- Resources -->
     <browser:resource
         name="manage-portlets.kss"

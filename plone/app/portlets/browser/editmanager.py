@@ -250,6 +250,20 @@ class ManagePortletAssignments(BrowserView):
         del assignments[name]
         self.request.response.redirect(self._nextUrl())
         return ''
+    
+    # view @@update-portlet-order
+    def update_portlet_order(self, name, after):
+        assignments = aq_inner(self.context)
+        IPortletPermissionChecker(assignments)()
+        
+        keys = list(assignments.keys())
+        
+        idx = keys.index(name)
+        keys.remove(name)
+        keys.insert(after, name)
+        assignments.updateOrder(keys)    
+        self.request.response.redirect(self._nextUrl())
+        return ''
         
     def _nextUrl(self):
         referer = self.request.get('referer')
