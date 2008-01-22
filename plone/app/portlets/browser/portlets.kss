@@ -1,20 +1,29 @@
-.portletAssignments .managedPortletActions .up:click {
+/*.portletAssignments .kssattr-viewname-manage-portletsActions .up:click {
     evt-click-preventdefault: true;
     action-server: inlineMovePortletUp;
     inlineMovePortletUp-portlethash: kssAttr('portlethash', true);
     inlineMovePortletUp-viewname: kssAttr('viewname', true);
 } 
 
-.portletAssignments .managedPortletActions .down:click {
+.portletAssignments .kssattr-viewname-manage-portletsActions .down:click {
     evt-click-preventdefault: true;
     action-server: inlineMovePortletDown;
     inlineMovePortletDown-portlethash: kssAttr('portlethash', true);
     inlineMovePortletDown-viewname: kssAttr('viewname', true);
 } 
 
-.portletAssignments .managedPortletActions .delete:click {
+.portletAssignments .kssattr-viewname-manage-portletsActions .delete:click {
     evt-click-preventdefault: true;
     action-server: inlineDeletePortlet;
     inlineDeletePortlet-portlethash: kssAttr('portlethash', true);
     inlineDeletePortlet-viewname: kssAttr('viewname', true);
-} 
+} */
+
+.kssattr-viewname-manage-portlets div.portlet:yuidnd-dragstart,
+.kssattr-viewname-manage-dashboard div.portlet:yuidnd-dragstart {
+}
+
+.kssattr-viewname-manage-portlets:yuidnd-drop,
+.kssattr-viewname-manage-dashboard:yuidnd-drop {
+    evt-yuidnd-drop-action: 'order';
+}
