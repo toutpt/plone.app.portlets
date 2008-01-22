@@ -150,7 +150,7 @@ class PortletsXMLAdapter(XMLAdapterBase):
         for c in columnManagerRegistrations:
             child = self._doc.createElement('columnmanager')
             child.setAttribute('name', c.name)
-            portletmanagers = queryUtility(IColumnManager,c.name).list_columns()
+            portletmanagers = queryUtility(IColumnManager,c.name)
             for r in portletManagerRegistrations:
                 if r.name in portletmanagers:
                     grandchild = self._doc.createElement('portletmanager')
