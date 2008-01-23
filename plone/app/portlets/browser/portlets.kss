@@ -1,11 +1,22 @@
-/* Delete a portlet 
 .portletAssignments .kssattr-viewname-manage-portletsActions .delete:click {
     evt-click-preventdefault: true;
     action-server: inlineDeletePortlet;
     inlineDeletePortlet-portlethash: kssAttr('portlethash', true);
     inlineDeletePortlet-viewname: kssAttr('viewname', true);
-}*/
+}
+.managedPortletActions .up:click {
+    evt-click-preventdefault: true;
+    action-server: inlineMovePortletUp;
+    inlineMovePortletUp-portlethash: kssAttr('portlethash', true);
+    inlineMovePortletUp-viewname: kssAttr('viewname', true);
+} 
 
+.managedPortletActions .down:click {
+    evt-click-preventdefault: true;
+    action-server: inlineMovePortletDown;
+    inlineMovePortletDown-portlethash: kssAttr('portlethash', true);
+    inlineMovePortletDown-viewname: kssAttr('viewname', true);
+}
 /* Allow dragging on children */
 .kssattr-viewname-manage-portlets div.portlet:yuidnd-dragstart,
 .kssattr-viewname-manage-dashboard div.portlet:yuidnd-dragstart {
@@ -15,17 +26,20 @@
 /* Allow dropping on the container */
 .kssattr-viewname-manage-portlets:yuidnd-drop,
 .kssattr-viewname-manage-dashboard:yuidnd-drop {
-    action-server: dropPortlet;
     evt-yuidnd-drop-action: 'order';
 }
 
 .kssattr-viewname-manage-portlets div.portlet:yuidnd-dragsuccess,
 .kssattr-viewname-manage-dashboard div.portlet:yuidnd-dragsuccess {
-    action-client: alert;
     action-server: dropPortlet;
+    dropPortlet-portlethash: kssAttr('portlethash', true);
+    dropPortlet-dropContainer: pass(dropContainerId);
+    dropPortlet-dropIndex: pass(dropIndex);
 }
 
 /*   dropPortlet-pass: dropContainer;
 action-server: dropPortlet;
+//dropPortlet-dropContainer: pass dropContainer;
+//dropPortlet-dropIndex: pass dropIndex;
 dropPortlet-portlethash: kssAttr('portlethash', true);
    dropPortlet-pass: dropIndex;*/

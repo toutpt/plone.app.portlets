@@ -17,6 +17,8 @@ from plone.portlets.constants import GROUP_CATEGORY
 from plone.portlets.constants import USER_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
 from plone.portlets.utils import hashPortletInfo
+from plone.portlets.utils import unhashPortletInfo
+from plone.app.portlets.utils import assignment_mapping_from_key
 from plone.app.portlets.interfaces import IDashboard, IPortletPermissionChecker
 from plone.app.portlets.browser.interfaces import IManageColumnPortletsView
 from plone.app.portlets.browser.interfaces import IManageContextualPortletsView
@@ -64,6 +66,9 @@ class EditPortletManagerRenderer(Explicit):
 
     def normalized_manager_name(self):
         return self.manager.__name__.replace('.', '-')
+    
+    def serialize_manager_name(self, name):
+        return name.replace('-','.')
 
     def baseUrl(self):
         return self.__parent__.getAssignmentMappingUrl(self.manager)
@@ -277,30 +282,40 @@ class ManagePortletAssignments(BrowserView):
 class ManageColumnAssignments(BrowserView):
     """Utility views for managing portlets for a particular column
     """
-    def move_portlet_to_column(self, name, column):
-        assignments = aq_inner(self.context)
-        IPortletPermissionChecker(assignments)()
-        moving_assignment = assignments[name]
-        del assignments[name]
+    def move_portlet_to_column(self, portlethash, column, after=None):
+        info = unhashPortletInfo(portlethash)
+        assignments = assignment_mapping_from_key(self.context,
+                         info['manager'], info['category'], info['key'])
+        moving_assignment = assignments[info['name']]
+        del assignments[info['name']]
         
         manager = None
         # Let's check if we are dealing with a USER_CATEGORY PortletManager
         portletmanager = queryUtility(IPortletManager, column)
-        if portletmanager is not None:
+        if portletmanager is None:
+            column = self.serialize_manager_name(column)
+            portletmanager = queryUtility(IPortletManager, column)
+        if portletmanager and portletmanager is not None:
             category = portletmanager.get(USER_CATEGORY, None)
             if category is not None:
                 portal_membership = getToolByName(self.context, 'portal_membership')
                 userid = portal_membership.getAuthenticatedMember().getId()
                 manager = category.get(userid, None)
         if manager is None:
-            # Maybe we are dealing with default plone portlets 
-            manager = getMultiAdapter((aq_parent(aq_inner(self.context)),
-                                       portletmanager), IPortletAssignmentMapping)
+            # Maybe we are dealing with default plone portlets
+            
+            manager = getMultiAdapter((self.context, portletmanager),
+                                      IPortletAssignmentMapping)
         chooser = INameChooser(manager)
+        # TODO needed to insert it after the given 'after' argument
         manager[chooser.chooseName(None, moving_assignment)] = moving_assignment
         self.request.response.redirect(self._nextUrl())
         return ''
         
+    def serialize_manager_name(self, name):
+        result = name[len('droppable-'):].replace('-','.')
+        return result
+
     def _nextUrl(self):
         referer = self.request.get('referer')
         if not referer:

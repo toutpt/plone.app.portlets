@@ -151,7 +151,7 @@
     <!-- Operations on columns when in edit mode -->
     <browser:page
       name="move-portlet-to-column"
-      for="plone.portlets.interfaces.IPortletAssignmentMapping"
+      for="*"
       class=".editmanager.ManageColumnAssignments"
       attribute="move_portlet_to_column"
       permission="plone.app.portlets.ManagePortlets"
@@ -208,6 +208,22 @@
       />
       
     <!-- KSS actions -->
+
+    <browser:page
+        for="*"
+        name="inlineMovePortletDown"
+        class=".kss.PortletManagerKSS"
+        attribute="move_portlet_down"
+        permission="plone.app.portlets.ManageOwnPortlets"
+        />
+    <browser:page
+        for="*"
+        name="inlineMovePortletUp"
+        class=".kss.PortletManagerKSS"
+        attribute="move_portlet_up"
+        permission="plone.app.portlets.ManageOwnPortlets"
+        />
+
     <browser:page
         for="*"
         name="inlineDeletePortlet"
