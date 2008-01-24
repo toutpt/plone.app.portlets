@@ -257,18 +257,18 @@ class ManagePortletAssignments(BrowserView):
         return ''
     
     # view @@update-portlet-order
-    def update_portlet_order(self, name, after):
-        assignments = aq_inner(self.context)
-        IPortletPermissionChecker(assignments)()
-        
+    def update_portlet_order(self, portlethash, after, from_kss=None):
+        info = unhashPortletInfo(portlethash)
+        name = info['name']
+        assignments = assignment_mapping_from_key(self.context,
+                         info['manager'], info['category'], info['key'])    
         keys = list(assignments.keys())
-        
         idx = keys.index(name)
         keys.remove(name)
         keys.insert(after, name)
         assignments.updateOrder(keys)    
-        self.request.response.redirect(self._nextUrl())
-        return ''
+        if from_kss is None:
+            self.request.response.redirect(self._nextUrl())
         
     def _nextUrl(self):
         referer = self.request.get('referer')

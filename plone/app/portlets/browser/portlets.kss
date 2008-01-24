@@ -1,9 +1,15 @@
-.portletAssignments .kssattr-viewname-manage-portletsActions .delete:click {
+.unmanagedPortletActions .delete:click {
     evt-click-preventdefault: true;
     action-server: inlineDeletePortlet;
     inlineDeletePortlet-portlethash: kssAttr('portlethash', true);
     inlineDeletePortlet-viewname: kssAttr('viewname', true);
 }
+
+/* These were the pre-dnd actions to move portlets up and down within one
+   portletmanager. We probably don't need them anymore. Hence that we do a
+   setStyle client action to hide all arrows, so effectively these events
+   can't be fired from the UI
+*/
 .managedPortletActions .up:click {
     evt-click-preventdefault: true;
     action-server: inlineMovePortletUp;
@@ -36,6 +42,7 @@
     evt-yuidnd-drop-action: order;
 }
 
+/* What to do when dropping was succesfull */
 .kssattr-viewname-manage-portlets div.portlet:yuidnd-dragsuccess,
 .kssattr-viewname-manage-dashboard div.portlet:yuidnd-dragsuccess {
     action-server: dropPortlet;
@@ -43,10 +50,3 @@
     dropPortlet-dropContainer: pass(dropContainerId);
     dropPortlet-dropIndex: pass(dropIndex);
 }
-
-/*   dropPortlet-pass: dropContainer;
-action-server: dropPortlet;
-//dropPortlet-dropContainer: pass dropContainer;
-//dropPortlet-dropIndex: pass dropIndex;
-dropPortlet-portlethash: kssAttr('portlethash', true);
-   dropPortlet-pass: dropIndex;*/

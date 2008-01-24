@@ -60,6 +60,8 @@
                     <a href="#" class="right"
                        tal:condition="portlet/right_url"
                        tal:attributes="href string:${portlet/right_url}&referer=${view/url_quote_referer}">&rarr;</a>
+                    </span>
+                    <span class="unmanagedPortletActions">
                     <a href="#" class="delete"
                        tal:attributes="href string:${portlet/delete_url}&referer=${view/url_quote_referer}">&times;</a>
                     </span>

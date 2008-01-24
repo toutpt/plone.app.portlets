@@ -157,6 +157,13 @@
       permission="plone.app.portlets.ManagePortlets"
       />
 
+    <browser:page
+        for="*"
+        name="update-portlet-order"
+        class=".editmanager.ManagePortletAssignments"
+        attribute="update_portlet_order"
+        permission="plone.app.portlets.ManageOwnPortlets"
+        />
 
     <!-- Adding view for portlet assignments -->
     <browser:view

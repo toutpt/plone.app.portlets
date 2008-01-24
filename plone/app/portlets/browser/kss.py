@@ -91,22 +91,21 @@ class DragDropManagerKSS(base):
     def drop_portlet(self, portlethash, dropContainer, dropIndex=None):
         if dropIndex is not None:
             dropIndex = int(dropIndex)
+        dropContainer = dropContainer[len('droppable-'):].replace('-','.')
         info = unhashPortletInfo(portlethash)
         context = aq_inner(self.context)
         request = aq_inner(self.request)        
-        # Dropping a portlet can happen in two cases:
+        # Dropping a portlet can happen in two cases:        
         if info['manager'] != dropContainer:
             # 1. The portlet is moved from one portletmanager to another
             colmover = getMultiAdapter((context, request),
                                        name='move-portlet-to-column')
             colmover.move_portlet_to_column(portlethash, dropContainer,
                                             after=dropIndex)
-            
         elif info['manager'] == dropContainer:
             # 2. The portlet is moved ordering within one portletmager
             sorter = getMultiAdapter((context, request),
                                      name='update-portlet-order')
-            sorter.update_portlet_order(info['name'], dropIndex)
-        else:
-            raise AttributeError
+            sorter.update_portlet_order(portlethash, dropIndex, from_kss=True)
+
         return self.render()

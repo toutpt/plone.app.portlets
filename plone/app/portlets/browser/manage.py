@@ -10,6 +10,7 @@ from Products.Five import BrowserView
 from Products.CMFCore.utils import getToolByName
 
 from plone.portlets.interfaces import IPortletManager
+from plone.portlets.interfaces import IColumnManager
 from plone.portlets.interfaces import IPortletAssignmentMapping
 from plone.portlets.interfaces import ILocalPortletAssignmentManager
 
@@ -107,7 +108,10 @@ class ManageDashboardPortlets(BrowserView):
     @property
     def key(self):
         return self._getUserId()
-    
+
+    def list_columns(self):
+        return getUtility(IColumnManager, 'plone.dashboard')
+
     def getAssignmentMappingUrl(self, manager):
         baseUrl = str(getMultiAdapter((self.context, self.request), name='absolute_url'))
         userId = self._getUserId()
