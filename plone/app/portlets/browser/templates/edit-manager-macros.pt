@@ -42,6 +42,7 @@
 
     <div tal:attributes="id string:droppable-${view/normalized_manager_name};
                          class string:kssattr-viewname-${view/__parent__/__name__}">
+        <div class="visualClear"><!-- --></div>
         <tal:block repeat="portlet view/portlets">
             <div tal:attributes="id string:draggable-${portlet/hash};
                                  class string:managedPortlet portlet kssattr-portlethash-${portlet/hash}">

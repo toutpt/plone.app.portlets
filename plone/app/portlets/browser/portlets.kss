@@ -17,16 +17,23 @@
     inlineMovePortletDown-portlethash: kssAttr('portlethash', true);
     inlineMovePortletDown-viewname: kssAttr('viewname', true);
 }
+
+.managedPortletActions:load {
+    action-client: setStyle;
+    setStyle-name: display;
+    setStyle-value: none;
+}
+
 /* Allow dragging on children */
 .kssattr-viewname-manage-portlets div.portlet:yuidnd-dragstart,
 .kssattr-viewname-manage-dashboard div.portlet:yuidnd-dragstart {
-
+   evt-yuidnd-dragstart-action: delete;
 }
 
 /* Allow dropping on the container */
 .kssattr-viewname-manage-portlets:yuidnd-drop,
 .kssattr-viewname-manage-dashboard:yuidnd-drop {
-    evt-yuidnd-drop-action: 'order';
+    evt-yuidnd-drop-action: order;
 }
 
 .kssattr-viewname-manage-portlets div.portlet:yuidnd-dragsuccess,

@@ -89,6 +89,8 @@ class DragDropManagerKSS(base):
     implements(IPloneKSSView)
     
     def drop_portlet(self, portlethash, dropContainer, dropIndex=None):
+        if dropIndex is not None:
+            dropIndex = int(dropIndex)
         info = unhashPortletInfo(portlethash)
         context = aq_inner(self.context)
         request = aq_inner(self.request)        
@@ -99,6 +101,7 @@ class DragDropManagerKSS(base):
                                        name='move-portlet-to-column')
             colmover.move_portlet_to_column(portlethash, dropContainer,
                                             after=dropIndex)
+            
         elif info['manager'] == dropContainer:
             # 2. The portlet is moved ordering within one portletmager
             sorter = getMultiAdapter((context, request),
@@ -106,3 +109,4 @@ class DragDropManagerKSS(base):
             sorter.update_portlet_order(info['name'], dropIndex)
         else:
             raise AttributeError
+        return self.render()

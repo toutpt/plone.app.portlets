@@ -300,17 +300,21 @@ class ManageColumnAssignments(BrowserView):
             if category is not None:
                 portal_membership = getToolByName(self.context, 'portal_membership')
                 userid = portal_membership.getAuthenticatedMember().getId()
-                manager = category.get(userid, None)
-        if manager is None:
+                assignments = category.get(userid, None)
+        if assignments is None:
             # Maybe we are dealing with default plone portlets
-            
-            manager = getMultiAdapter((self.context, portletmanager),
+            assignments = getMultiAdapter((self.context, portletmanager),
                                       IPortletAssignmentMapping)
-        chooser = INameChooser(manager)
-        # TODO needed to insert it after the given 'after' argument
-        manager[chooser.chooseName(None, moving_assignment)] = moving_assignment
-        self.request.response.redirect(self._nextUrl())
-        return ''
+        chooser = INameChooser(assignments)
+        name = chooser.chooseName(None, moving_assignment)
+        assignments[name] = moving_assignment
+        if after is not None:
+            keys = list(assignments.keys())
+            keys.remove(name)
+            keys.insert(after, name)
+            assignments.updateOrder(keys)
+        else:
+            self.request.response.redirect(self._nextUrl())
         
     def serialize_manager_name(self, name):
         result = name[len('droppable-'):].replace('-','.')
