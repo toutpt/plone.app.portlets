@@ -1,3 +1,5 @@
+import logging
+
 from zope.interface import implements
 from zope.interface import Interface
 from zope.interface import directlyProvides
@@ -27,6 +29,7 @@ from plone.portlets.manager import PortletManager
 from plone.portlets.storage import PortletCategoryMapping
 from plone.portlets.registration import PortletType
 
+from Products.CMFPlone.utils import log
 from Products.CMFPlone.utils import log_deprecated
 
 def dummyGetId():
@@ -140,7 +143,7 @@ class PortletsXMLAdapter(XMLAdapterBase):
         #BBB
         for_ = self._BBB_for(for_)
         
-        if for_ and for_ != []:
+        if for_:
             for i in for_:
                 subNode = self._doc.createElement('for')
                 subNode.setAttribute('interface', _getDottedName(i))
@@ -181,6 +184,14 @@ class PortletsXMLAdapter(XMLAdapterBase):
                  'interface.Interface" /> instead.')
                 for_.append(interface_name)
 
+            duplicate_names = [i for i in for_ if for_.count(i) > 1]
+            for i in duplicate_names:
+                log('The GenericSetup registration for portlet type %s ' % addview + \
+                 'includes duplicate associations with the portlet manager ' \
+                 'interface %s.' % i, severity=logging.WARNING)
+                while for_.count(i) > 1:
+                    for_.remove(i)
+            
             for_ = [_resolveDottedName(i) for i in for_ if \
                     _resolveDottedName(i) is not None]
             portlet.for_ = for_

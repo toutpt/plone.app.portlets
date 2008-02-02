@@ -41,6 +41,13 @@ class TestImportPortlets(PortletsTestCase):
         self.failUnless(portlet is not None)
         self.assertEqual([IColumn, IDashboard], portlet.for_)
     
+    def test_initPortletNode_duplicateInterfaces(self):
+        node = parseString(_XML_DUPLICATE_INTERFACES).documentElement
+        self.importer._initPortletNode(node)
+        portlet = queryUtility(IPortletType, name="portlets.New")
+        self.failUnless(portlet is not None)
+        self.assertEqual([IColumn], portlet.for_)
+    
     def test_initPortletNode_defaultManagerInterface(self):
         node = parseString(_XML_DEFAULT_INTERFACE).documentElement
         self.importer._initPortletNode(node)
@@ -116,6 +123,13 @@ _XML_MULTIPLE_INTERFACES = """<?xml version="1.0"?>
 <portlet addview="portlets.New" title="Foo" description="Foo">
   <for interface="plone.app.portlets.interfaces.IColumn" />
   <for interface="plone.app.portlets.interfaces.IDashboard" />
+</portlet>
+"""
+
+_XML_DUPLICATE_INTERFACES = """<?xml version="1.0"?>
+<portlet addview="portlets.New" title="Foo" description="Foo">
+  <for interface="plone.app.portlets.interfaces.IColumn" />
+  <for interface="plone.app.portlets.interfaces.IColumn" />
 </portlet>
 """
 
