@@ -1,7 +1,4 @@
-import logging
-
 from zope.interface import implements
-from zope.interface import Interface
 from zope.interface import directlyProvides
 from zope.interface import providedBy
 
@@ -28,9 +25,6 @@ from plone.portlets.constants import USER_CATEGORY, GROUP_CATEGORY, CONTENT_TYPE
 from plone.portlets.manager import PortletManager
 from plone.portlets.storage import PortletCategoryMapping
 from plone.portlets.registration import PortletType
-
-from Products.CMFPlone.utils import log
-from Products.CMFPlone.utils import log_deprecated
 
 def dummyGetId():
     return ''
@@ -178,17 +172,18 @@ class PortletsXMLAdapter(XMLAdapterBase):
             
             interface_name = node.getAttribute('for')
             if interface_name:
-                log_deprecated('The "for" attribute of the portlet node in ' \
-                 'portlets.xml is deprecated and will be removed in Plone ' \
-                 '4.0. Use children nodes of the form <for interface="zope.' \
-                 'interface.Interface" /> instead.')
+                self._logger.warning('Deprecation Warning The "for" ' \
+                 'attribute of the portlet node in portlets.xml is ' \
+                 'deprecated and will be removed in Plone 4.0. Use children ' \
+                 'nodes of the form <for interface="foo.BarInterface " /> ' \
+                 'instead.')
                 for_.append(interface_name)
 
             duplicate_names = set([i for i in for_ if for_.count(i) > 1])
             for i in duplicate_names:
-                log('The GenericSetup registration for portlet type %s ' % addview + \
-                 'includes duplicate associations with the portlet manager ' \
-                 'interface %s.' % i, severity=logging.WARNING)
+                self._logger.warning('The GenericSetup registration for ' \
+                 'portlet type %s includes duplicate ' % addview + \
+                 'associations with the portlet manager interface %s.' % i)
                 while for_.count(i) > 1:
                     for_.remove(i)
             
