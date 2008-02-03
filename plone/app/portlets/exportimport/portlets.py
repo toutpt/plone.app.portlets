@@ -184,7 +184,7 @@ class PortletsXMLAdapter(XMLAdapterBase):
                  'interface.Interface" /> instead.')
                 for_.append(interface_name)
 
-            duplicate_names = [i for i in for_ if for_.count(i) > 1]
+            duplicate_names = set([i for i in for_ if for_.count(i) > 1])
             for i in duplicate_names:
                 log('The GenericSetup registration for portlet type %s ' % addview + \
                  'includes duplicate associations with the portlet manager ' \
