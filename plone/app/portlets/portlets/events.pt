@@ -19,22 +19,24 @@
                     plone_view context/@@plone;
                     getIcon nocall:plone_view/getIcon;
                     item_icon python:getIcon(obj);"
-        tal:attributes="class python:oddrow and 'portletItem even' or 'portletItem odd'">
+        tal:attributes="class python:oddrow and 'portletItem even vevent' or 'portletItem odd vevent'">
         <a href="#"
-           class="tile"
+           class="tile url"
            tal:attributes="href obj/getURL;
                            title obj/Description">
             <img tal:replace="structure item_icon/html_tag" />
-            <span tal:replace="obj/pretty_title_or_id">
+            <span class="summary" tal:content="obj/pretty_title_or_id">
              Some Event 
             </span>
             <span class="portletItemDetails">
                 <tal:condition condition="obj/location">
-                    <tal:location content="obj/location">Location</tal:location>, <br />
+                    <span class="location" tal:content="obj/location">Location</span>, <br />
                 </tal:condition>
-                <tal:date content="python:toLocalizedTime(obj.start)">
+                <abbr class="dtstart" title="" 
+                    tal:attributes="title python:obj.start.ISO()"
+                    content="python:toLocalizedTime(obj.start)">
                 May 5
-                </tal:date>
+                </abbr>
             </span>
         </a>
     </dd>
