@@ -33,7 +33,7 @@
                     <span class="location" tal:content="obj/location">Location</span>, <br />
                 </tal:condition>
                 <abbr class="dtstart" title="" 
-                    tal:attributes="title python:obj.start.ISO()"
+                    tal:attributes="title python:obj.start.ISO8601()"
                     content="python:toLocalizedTime(obj.start)">
                 May 5
                 </abbr>
