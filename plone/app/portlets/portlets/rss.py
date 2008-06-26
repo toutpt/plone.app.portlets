@@ -19,15 +19,11 @@ from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 import feedparser
 import time, socket
 from urllib2 import ProxyHandler
-from urllib2 import getproxies
 
 from DateTime import DateTime
 
 # store the feeds here (which means in RAM)
 FEED_DATA = {}  # url: ({date, title, url, itemlist})
-
-# Default proxies
-DEFAULT_PROXIES = getproxies()
 
 class IFeed(Interface):
     
@@ -257,17 +253,10 @@ class Renderer(base.DeferredRenderer):
         if feed is None:
             # create it
             handlers = []
-            sp = getToolByName(self.context, 'portal_properties').site_properties
-            html_proxy = sp.getProperty('html_proxy', None)
+            html_proxy = getToolByName(self.context, 'portal_properties').site_properties.getProperty('html_proxy', None)
             if html_proxy is not None:
-                proxies = DEFAULT_PROXIES.copy()
-                proxies["html"]=html_proxy
-            else:
-                proxies = DEFAULT_PROXIES
-            if proxies:
-                handlers.append(ProxyHandler(proxies))
-            feed = FEED_DATA[self.data.url] = RSSFeed(self.data.url,
-                    self.data.timeout, handlers=handlers)
+                handlers.append(ProxyHandler({'http':html_proxy}))
+            feed = FEED_DATA[self.data.url] = RSSFeed(self.data.url,self.data.timeout,handlers=handlers)
         return feed
         
     @property
