@@ -67,3 +67,7 @@ class IManageGroupPortletsView(IManageColumnPortletsView):
 class IManageContentTypePortletsView(IManageColumnPortletsView):
     """Marker for the manage content type portlets view
     """
+
+class IManageGlobalPortletsView(IManageColumnPortletsView):
+    """ Marker for manage global portlets view.
+    """

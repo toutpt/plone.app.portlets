@@ -46,6 +46,10 @@
         factory=".traversal.ContentTypePortletNamespace"
         name="contenttypeportlets"
         />
+    <adapter
+        factory=".traversal.GlobalPortletNamespace"
+        name="globalportlets"
+        />
 
     <!-- Portlet management pages -->
     
@@ -86,6 +90,14 @@
       name="manage-dashboard"
       template="templates/manage-dashboard.pt"
       permission="plone.app.portlets.ManageOwnPortlets"
+      />
+
+    <browser:page
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      class=".manage.ManageGlobalPortlets"
+      name="manage-global-portlets"
+      template="templates/manage-global.pt"
+      permission="plone.app.portlets.ManagePortlets"
       />
     
     <browser:page

@@ -41,6 +41,7 @@ from plone.portlets.constants import USER_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
 from plone.portlets.constants import CONTEXT_CATEGORY
+from plone.portlets.constants import GLOBAL_CATEGORY
 
 from plone.portlets.manager import PortletManager
 from plone.portlets.storage import PortletCategoryMapping
@@ -320,7 +321,8 @@ class PortletsXMLAdapter(XMLAdapterBase):
             manager[USER_CATEGORY] = PortletCategoryMapping()
             manager[GROUP_CATEGORY] = PortletCategoryMapping()
             manager[CONTENT_TYPE_CATEGORY] = PortletCategoryMapping()
-        
+            manager[GLOBAL_CATEGORY] = PortletCategoryMapping()
+
             self.context.registerUtility(component=manager,
                                          provided=IPortletManager,
                                          name=name)

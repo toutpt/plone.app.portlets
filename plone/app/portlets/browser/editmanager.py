@@ -2,6 +2,7 @@ from plone.memoize.view import memoize
 
 from plone.portlets.constants import CONTEXT_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
+from plone.portlets.constants import GLOBAL_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
 from plone.portlets.interfaces import IPortletManager
 from plone.portlets.interfaces import IPortletManagerRenderer
@@ -167,6 +168,10 @@ class ContextualEditPortletManagerRenderer(EditPortletManagerRenderer):
     def content_type_blacklist_status(self):
         assignable = getMultiAdapter((self.context, self.manager,), ILocalPortletAssignmentManager)
         return assignable.getBlacklistStatus(CONTENT_TYPE_CATEGORY)
+
+    def global_blacklist_status(self):
+        assignable = getMultiAdapter((self.context, self.manager,), ILocalPortletAssignmentManager)
+        return assignable.getBlacklistStatus(GLOBAL_CATEGORY)  
   
 class DashboardEditPortletManagerRenderer(EditPortletManagerRenderer):
     """Render a portlet manager in edit mode for the dashboard

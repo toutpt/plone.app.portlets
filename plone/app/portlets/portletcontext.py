@@ -12,6 +12,8 @@ from plone.portlets.interfaces import IPortletContext
 from plone.portlets.constants import USER_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
+from plone.portlets.constants import GLOBAL_CATEGORY
+from plone.portlets.constants import GLOBAL_CATEGORY_KEY
 
 class ContentContext(object):
     """A portlet context for regular content items.
@@ -35,6 +37,7 @@ class ContentContext(object):
 
     def globalPortletCategories(self, placeless=False):
         cats = []
+        cats.append((GLOBAL_CATEGORY, GLOBAL_CATEGORY_KEY))
         if not placeless:
             pt = self._getContentType()
             if pt is not None:

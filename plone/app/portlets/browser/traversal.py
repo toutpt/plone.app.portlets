@@ -13,6 +13,7 @@ from Products.CMFCore.interfaces import ISiteRoot
 from plone.portlets.constants import USER_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
+from plone.portlets.constants import GLOBAL_CATEGORY
 
 from plone.app.portlets.storage import PortletAssignmentMapping
 from plone.app.portlets.storage import UserPortletAssignmentMapping
@@ -118,6 +119,36 @@ class ContentTypePortletNamespace(object):
             manager.__manager__ = col
         if not getattr(manager, '__category__', None):
             manager.__category__ = CONTENT_TYPE_CATEGORY
+        if not getattr(manager, '__name__', None):
+            manager.__name__ = pt
+        
+        return manager
+
+class GlobalPortletNamespace(object):
+    """Used to traverse to a global portlet assignable
+    """
+    implements(ITraversable)
+    adapts(ISiteRoot, IHTTPRequest)
+    
+    def __init__(self, context, request=None):
+        self.context = context
+        self.request = request
+        
+    def traverse(self, name, ignore):
+        col, pt = name.split('+')
+        column = getUtility(IPortletManager, name=col)
+        category = column[GLOBAL_CATEGORY]
+        manager = category.get(pt, None)
+        if manager is None:
+            manager = category[pt] = PortletAssignmentMapping(manager=col,
+                                                              category=GLOBAL_CATEGORY,
+                                                              name=pt)
+        
+        # XXX: For graceful migration
+        if not getattr(manager, '__manager__', None):
+            manager.__manager__ = col
+        if not getattr(manager, '__category__', None):
+            manager.__category__ = GLOBAL_CATEGORY
         if not getattr(manager, '__name__', None):
             manager.__name__ = pt
         

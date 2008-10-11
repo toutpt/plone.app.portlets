@@ -13,9 +13,10 @@ class TestBasicContext(PortletsTestCase):
     def testGlobalsNoGroups(self):
         ctx = IPortletContext(self.folder)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 3)
-        self.assertEquals(g[0], ('content_type', 'Folder'))
-        self.assertEquals(g[1], ('user', user_name))
+        self.assertEquals(len(g), 4)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Folder'))
+        self.assertEquals(g[2], ('user', user_name))
 
     def testGlobalsWithSingleGroup(self):
 
@@ -26,10 +27,12 @@ class TestBasicContext(PortletsTestCase):
 
         ctx = IPortletContext(self.folder)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 4)
-        self.assertEquals(g[0], ('content_type', 'Folder'))
-        self.assertEquals(g[1], ('user', user_name))
-        self.assertEquals(g[3], ('group', 'Reviewers'))
+        self.assertEquals(len(g), 5)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Folder'))
+        self.assertEquals(g[2], ('user', user_name))
+        self.assertEquals(g[4], ('group', 'Reviewers'))
+
 
     def testGlobalsWithMultipleGroup(self):
 
@@ -42,19 +45,21 @@ class TestBasicContext(PortletsTestCase):
 
         ctx = IPortletContext(self.folder)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 5)
-        self.assertEquals(g[0], ('content_type', 'Folder'))
-        self.assertEquals(g[1], ('user', user_name))
-        self.assertEquals(g[2], ('group', 'Administrators'))
-        self.assertEquals(g[4], ('group', 'Reviewers'))
+        self.assertEquals(len(g), 6)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Folder'))
+        self.assertEquals(g[2], ('user', user_name))
+        self.assertEquals(g[3], ('group', 'Administrators'))
+        self.assertEquals(g[5], ('group', 'Reviewers'))
 
     def testAnonymous(self):
         self.logout()
         ctx = IPortletContext(self.folder)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 2)
-        self.assertEquals(g[0], ('content_type', 'Folder'))
-        self.assertEquals(g[1], ('user', 'Anonymous User'))
+        self.assertEquals(len(g), 3)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Folder'))
+        self.assertEquals(g[2], ('user', 'Anonymous User'))
 
 class TestPortalRootContext(PortletsTestCase):
 
@@ -65,9 +70,11 @@ class TestPortalRootContext(PortletsTestCase):
     def testGlobalsNoGroups(self):
         ctx = IPortletContext(self.portal)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 3)
-        self.assertEquals(g[0], ('content_type', 'Plone Site'))
-        self.assertEquals(g[1], ('user', user_name))
+        self.assertEquals(len(g), 4)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Plone Site'))
+        self.assertEquals(g[2], ('user', user_name))
+
 
     def testGlobalsWithSingleGroup(self):
 
@@ -78,10 +85,11 @@ class TestPortalRootContext(PortletsTestCase):
 
         ctx = IPortletContext(self.portal)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 4)
-        self.assertEquals(g[0], ('content_type', 'Plone Site'))
-        self.assertEquals(g[1], ('user', user_name))
-        self.assertEquals(g[3], ('group', 'Reviewers'))
+        self.assertEquals(len(g), 5)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Plone Site'))
+        self.assertEquals(g[2], ('user', user_name))
+        self.assertEquals(g[4], ('group', 'Reviewers'))
 
     def testGlobalsWithMultipleGroup(self):
 
@@ -94,19 +102,21 @@ class TestPortalRootContext(PortletsTestCase):
 
         ctx = IPortletContext(self.portal)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 5)
-        self.assertEquals(g[0], ('content_type', 'Plone Site'))
-        self.assertEquals(g[1], ('user', user_name))
-        self.assertEquals(g[2], ('group', 'Administrators'))
-        self.assertEquals(g[4], ('group', 'Reviewers'))
+        self.assertEquals(len(g), 6)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Plone Site'))
+        self.assertEquals(g[2], ('user', user_name))
+        self.assertEquals(g[3], ('group', 'Administrators'))
+        self.assertEquals(g[5], ('group', 'Reviewers'))
 
     def testAnonymous(self):
         self.logout()
         ctx = IPortletContext(self.portal)
         g = ctx.globalPortletCategories()
-        self.assertEquals(len(g), 2)
-        self.assertEquals(g[0], ('content_type', 'Plone Site'))
-        self.assertEquals(g[1], ('user', 'Anonymous User'))
+        self.assertEquals(len(g), 3)
+        self.assertEquals(g[0], ('global', u'global'))
+        self.assertEquals(g[1], ('content_type', 'Plone Site'))
+        self.assertEquals(g[2], ('user', 'Anonymous User'))
 
 def test_suite():
     from unittest import TestSuite, makeSuite

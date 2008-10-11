@@ -17,6 +17,8 @@ from plone.portlets.constants import USER_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
 from plone.portlets.constants import CONTENT_TYPE_CATEGORY
 from plone.portlets.constants import CONTEXT_CATEGORY
+from plone.portlets.constants import GLOBAL_CATEGORY
+from plone.portlets.constants import GLOBAL_CATEGORY_KEY
 
 from plone.app.portlets.storage import PortletAssignmentMapping
 from plone.app.portlets.storage import UserPortletAssignmentMapping
@@ -28,6 +30,7 @@ from plone.app.portlets.browser.interfaces import IManageContextualPortletsView
 from plone.app.portlets.browser.interfaces import IManageDashboardPortletsView
 from plone.app.portlets.browser.interfaces import IManageGroupPortletsView
 from plone.app.portlets.browser.interfaces import IManageContentTypePortletsView
+from plone.app.portlets.browser.interfaces import IManageGlobalPortletsView
 
 from plone.app.portlets import utils
 from plone.memoize.view import memoize
@@ -66,7 +69,7 @@ class ManageContextualPortlets(BrowserView):
         return (left_slots or right_slots)
 
     # view @@set-portlet-blacklist-status
-    def set_blacklist_status(self, manager, group_status, content_type_status, context_status):
+    def set_blacklist_status(self, manager, group_status, content_type_status, context_status, global_status):
         portletManager = getUtility(IPortletManager, name=manager)
         assignable = getMultiAdapter((self.context, portletManager,), ILocalPortletAssignmentManager)
         assignments = getMultiAdapter((self.context, portletManager), IPortletAssignmentMapping)
@@ -84,6 +87,7 @@ class ManageContextualPortlets(BrowserView):
         assignable.setBlacklistStatus(GROUP_CATEGORY, int2status(group_status))
         assignable.setBlacklistStatus(CONTENT_TYPE_CATEGORY, int2status(content_type_status))
         assignable.setBlacklistStatus(CONTEXT_CATEGORY, int2status(context_status))
+        assignable.setBlacklistStatus(GLOBAL_CATEGORY, int2status(global_status))
         
         baseUrl = str(getMultiAdapter((self.context, self.request), name='absolute_url'))
         self.request.response.redirect(baseUrl + '/@@manage-portlets')
@@ -224,6 +228,40 @@ class ManageContentTypePortlets(BrowserView):
         for fti in portal_types.listTypeInfo():
             if fti.getId() == portal_type:
                 return fti
+
+class ManageGlobalPortlets(BrowserView):
+    implements(IManageGlobalPortletsView)
+
+    def __init__(self, context, request):
+        super(ManageGlobalPortlets, self).__init__(context, request)
+        self.request.set('disable_border', True)
+        
+    # IManagePortletsView implementation
+
+    @property
+    def category(self):
+        return GLOBAL_CATEGORY
+        
+    @property
+    def key(self):
+        return GLOBAL_CATEGORY_KEY
+
+    def getAssignmentMappingUrl(self, manager):
+        baseUrl = str(getMultiAdapter((self.context, self.request), name='absolute_url'))
+        pt = GLOBAL_CATEGORY_KEY
+        return '%s/++globalportlets++%s+%s' % (baseUrl, manager.__name__, pt)
+
+    def getAssignmentsForManager(self, manager):
+        pt = GLOBAL_CATEGORY_KEY
+        column = getUtility(IPortletManager, name=manager.__name__)
+        category = column[GLOBAL_CATEGORY]
+        mapping = category.get(pt, None)
+        if mapping is None:
+            mapping = category[pt] = PortletAssignmentMapping(manager=manager.__name__,
+                                                              category=GLOBAL_CATEGORY,
+                                                              name=pt)
+        return mapping.values()
+
                 
 class ManagePortletsViewlet(BrowserView):
     """A general base class for viewlets that want to be rendered on the
