@@ -47,6 +47,7 @@ class Renderer(base.Renderer):
         self.anonymous = portal_state.anonymous()
         self.portal_url = portal_state.portal_url()
         self.typesToShow = portal_state.friendly_types()
+        self.navigation_root_path = portal_state.navigation_root_path()
 
         plone_tools = getMultiAdapter((context, self.request), name=u'plone_tools')
         self.catalog = plone_tools.catalog()
@@ -67,8 +68,11 @@ class Renderer(base.Renderer):
 
     @memoize
     def _data(self):
+        context = aq_inner(self.context)
         limit = self.data.count
+        path = self.navigation_root_path
         return self.catalog(portal_type=self.typesToShow,
+                            path=path,
                             sort_on='modified',
                             sort_order='reverse',
                             sort_limit=limit)[:limit]

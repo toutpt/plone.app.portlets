@@ -52,6 +52,8 @@ class Renderer(base.Renderer):
         portal_state = getMultiAdapter((self.context, self.request), name=u'plone_portal_state')
         self.portal_url = portal_state.portal_url()
         self.portal = portal_state.portal()
+        self.navigation_root_path = portal_state.navigation_root_path()
+
 
         self.have_events_folder = 'events' in self.portal.objectIds()
 
@@ -90,10 +92,12 @@ class Renderer(base.Renderer):
         catalog = getToolByName(context, 'portal_catalog')
         limit = self.data.count
         state = self.data.state
+        path = self.navigation_root_path
         return catalog(portal_type='Event',
                        review_state=state,
                        end={'query': DateTime(),
                             'range': 'min'},
+                       path=path,
                        sort_on='start',
                        sort_limit=limit)[:limit]
 

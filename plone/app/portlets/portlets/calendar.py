@@ -7,6 +7,7 @@ from plone.portlets.interfaces import IPortletDataProvider
 
 from zope.i18nmessageid import MessageFactory
 from zope.interface import implements
+from zope.component import getMultiAdapter
 
 from Acquisition import aq_inner
 from DateTime import DateTime
@@ -50,6 +51,8 @@ def _render_cachekey(fun, self):
         print >> key, year
         print >> key, month
 
+        portal_state = getMultiAdapter((context, self.request), name=u'plone_portal_state')
+        navigation_root_path = portal_state.navigation_root_path()
         start = DateTime('%s/%s/1' % (year, month))
         end = DateTime('%s/%s/1' % self.getNextMonth(year, month)) - 1
 
@@ -60,11 +63,13 @@ def _render_cachekey(fun, self):
             key.write('\n\n')
 
         catalog = getToolByName(context, 'portal_catalog')
+        path = navigation_root_path
         brains = catalog(
             portal_type=self.calendar.getCalendarTypes(),
             review_state=self.calendar.getCalendarStates(),
             start={'query': end, 'range': 'max'},
-            end={'query': start, 'range': 'min'})
+            end={'query': start, 'range': 'min'},
+            path=path)
 
         for brain in brains:
             add(brain)

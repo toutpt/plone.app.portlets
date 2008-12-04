@@ -45,6 +45,15 @@ class Renderer(base.Renderer):
 
     _template = ViewPageTemplateFile('news.pt')
 
+    def __init__(self, *args):
+        base.Renderer.__init__(self, *args)
+
+        context = aq_inner(self.context)
+        portal_state = getMultiAdapter((context, self.request), name=u'plone_portal_state')
+        self.portal = portal_state.portal()
+        self.portal_url = portal_state.portal_url()
+        self.navigation_root_path = portal_state.navigation_root_path()
+
     @ram.cache(render_cachekey)
     def render(self):
         return xhtml_compress(self._template())
@@ -56,13 +65,9 @@ class Renderer(base.Renderer):
     def published_news_items(self):
         return self._data()
 
-    def all_news_link(self):
-        portal_state = getMultiAdapter((self.context, self.request), name=u'plone_portal_state')
-        portal_url = portal_state.portal_url()
-        portal = portal_state.portal()
-        
-        if 'news' in portal.objectIds():
-            return '%s/news' % portal_url
+    def all_news_link(self):        
+        if 'news' in self.portal.objectIds():
+            return '%s/news' % self.portal_url
         else:
             return None
 
@@ -70,10 +75,12 @@ class Renderer(base.Renderer):
     def _data(self):
         context = aq_inner(self.context)
         catalog = getToolByName(context, 'portal_catalog')
+        path = self.navigation_root_path
         limit = self.data.count
         state = self.data.state
         return catalog(portal_type='News Item',
                        review_state=state,
+                       path=path,
                        sort_on='Date',
                        sort_order='reverse',
                        sort_limit=limit)[:limit]
