@@ -9,6 +9,7 @@ from plone.memoize.compress import xhtml_compress
 from plone.memoize.instance import memoize
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.cache import render_cachekey
+from plone.app.layout.navigation.root import getNavigationRootObject
 
 from Acquisition import aq_inner
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
@@ -65,8 +66,8 @@ class Renderer(base.Renderer):
     def published_news_items(self):
         return self._data()
 
-    def all_news_link(self):        
-        if 'news' in self.portal.objectIds():
+    def all_news_link(self):
+        if 'news' in getNavigationRootObject(self.context, self.portal).objectIds():
             return '%s/news' % self.navigation_root_url
         else:
             return None

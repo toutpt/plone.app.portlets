@@ -9,6 +9,7 @@ from plone.memoize import ram
 from plone.memoize.compress import xhtml_compress
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.cache import render_cachekey
+from plone.app.layout.navigation.root import getNavigationRootObject
 
 from Acquisition import aq_inner
 from DateTime.DateTime import DateTime
@@ -54,8 +55,9 @@ class Renderer(base.Renderer):
         self.portal = portal_state.portal()
         self.navigation_root_path = portal_state.navigation_root_path()
 
+        self.have_events_folder = 'events' in getNavigationRootObject(self.context,         
+                                                                      self.portal).objectIds()
 
-        self.have_events_folder = 'events' in self.portal.objectIds()
 
     @ram.cache(render_cachekey)
     def render(self):
