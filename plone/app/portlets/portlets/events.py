@@ -50,7 +50,7 @@ class Renderer(base.Renderer):
         base.Renderer.__init__(self, *args)
 
         portal_state = getMultiAdapter((self.context, self.request), name=u'plone_portal_state')
-        self.portal_url = portal_state.portal_url()
+        self.navigation_root_url = portal_state.navigation_root_url()
         self.portal = portal_state.portal()
         self.navigation_root_path = portal_state.navigation_root_path()
 
@@ -70,19 +70,19 @@ class Renderer(base.Renderer):
 
     def all_events_link(self):
         if self.have_events_folder:
-            return '%s/events' % self.portal_url
+            return '%s/events' % self.navigation_root_url
         else:
-            return '%s/events_listing' % self.portal_url
+            return '%s/events_listing' % self.navigation_root_url
 
     def prev_events_link(self):
         if (self.have_events_folder and
             'aggregator' in self.portal['events'].objectIds() and
             'previous' in self.portal['events']['aggregator'].objectIds()):
-            return '%s/events/aggregator/previous' % self.portal_url
+            return '%s/events/aggregator/previous' % self.navigation_root_url
             
         elif (self.have_events_folder and
             'previous' in self.portal['events'].objectIds()):
-            return '%s/events/previous' % self.portal_url
+            return '%s/events/previous' % self.navigation_root_url
         else:
             return None
 

@@ -51,7 +51,7 @@ class Renderer(base.Renderer):
         context = aq_inner(self.context)
         portal_state = getMultiAdapter((context, self.request), name=u'plone_portal_state')
         self.portal = portal_state.portal()
-        self.portal_url = portal_state.portal_url()
+        self.navigation_root_url = portal_state.navigation_root_url()
         self.navigation_root_path = portal_state.navigation_root_path()
 
     @ram.cache(render_cachekey)
@@ -67,7 +67,7 @@ class Renderer(base.Renderer):
 
     def all_news_link(self):        
         if 'news' in self.portal.objectIds():
-            return '%s/news' % self.portal_url
+            return '%s/news' % self.navigation_root_url
         else:
             return None
 
