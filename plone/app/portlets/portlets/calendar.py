@@ -42,8 +42,9 @@ def _render_cachekey(fun, self):
     if self.calendar.getUseSession():
         raise ram.DontCache()
     else:
+        portal_state = getMultiAdapter((context, self.request), name=u'plone_portal_state')
         key = StringIO()
-        print >> key, getToolByName(context, 'portal_url')()
+        print >> key, portal_state.navigation_root_url()
         print >> key, cache.get_language(context, self.request)
         print >> key, self.calendar.getFirstWeekDay()
 
@@ -51,7 +52,6 @@ def _render_cachekey(fun, self):
         print >> key, year
         print >> key, month
 
-        portal_state = getMultiAdapter((context, self.request), name=u'plone_portal_state')
         navigation_root_path = portal_state.navigation_root_path()
         start = DateTime('%s/%s/1' % (year, month))
         end = DateTime('%s/%s/1' % self.getNextMonth(year, month)) - 1
@@ -118,6 +118,7 @@ class Renderer(base.Renderer):
         context = aq_inner(self.context)
         year = self.year
         month = self.month
+        import pdb; pdb.set_trace( )
         weeks = self.calendar.getEventsForCalendar(month, year)
         for week in weeks:
             for day in week:
