@@ -118,7 +118,6 @@ class Renderer(base.Renderer):
         context = aq_inner(self.context)
         year = self.year
         month = self.month
-        import pdb; pdb.set_trace( )
         weeks = self.calendar.getEventsForCalendar(month, year)
         for week in weeks:
             for day in week:
