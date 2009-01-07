@@ -35,7 +35,7 @@
 
 <div metal:define-macro="current-portlets-list" class="portletAssignments"
     i18n:domain="plone">
-     
+  
     <h4 i18n:translate="heading_portlets_assigned_here">
         Portlets assigned here
     </h4>
@@ -47,12 +47,12 @@
                     <span class="managedPortletActions">
                     <a href="#" class="up"
                        tal:condition="not:repeat/portlet/start"
-                       tal:attributes="href string:${portlet/up_url}&referer=${view/url_quote_referer}">&uarr;</a>
+                       tal:attributes="href string:${portlet/up_url}&amp;referer=${view/url_quote_referer}">&uarr;</a>
                     <a href="#" class="down"
                        tal:condition="not:repeat/portlet/end"
-                       tal:attributes="href string:${portlet/down_url}&referer=${view/url_quote_referer}">&darr;</a>
+                       tal:attributes="href string:${portlet/down_url}&amp;referer=${view/url_quote_referer}">&darr;</a>
                     <a href="#" class="delete"
-                       tal:attributes="href string:${portlet/delete_url}&referer=${view/url_quote_referer}">&times;</a>
+                       tal:attributes="href string:${portlet/delete_url}&amp;referer=${view/url_quote_referer}">&times;</a>
                     </span>
                     <a tal:omit-tag="not:portlet/editview"
                        tal:attributes="href string:${portlet/editview}?referer=${view/url_quote_referer}"
@@ -61,4 +61,19 @@
             </div>
         </tal:block>
     </div>
+
+    <tal:block define="portlets view/inherited_portlets" condition="portlets">
+      <h4 i18n:translate="heading_inherited_portlets">
+        Inherited portlets
+      </h4>
+      
+      <div class="managedPortlet inheritedPortlet" tal:repeat="portlet portlets">
+        <div class="portletHeader">
+          <a tal:omit-tag="not:portlet/editview"
+             tal:attributes="href string:${portlet/editview}/?referer=${view/url_quote_referer}"
+             tal:content="portlet/title" />
+        </div>
+      </div>
+    </tal:block>
+      
 </div>
