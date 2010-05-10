@@ -99,19 +99,30 @@ class TestRenderer(PortletsTestCase):
         self.assertEquals(2, len(r.published_events()))
 
     def test_all_events_link(self):
-        r = self.renderer(assignment=events.Assignment(count=5))
-        self.failUnless(r.all_events_link().endswith('/events'))
-        self.portal._delObject('events')
+        # if there is an 'events' object in the portal root, we expect
+        # the events portlet to link to it
+        if 'events' in self.portal:
+            self.portal._delObject('events')
         r = self.renderer(assignment=events.Assignment(count=5))
         self.failUnless(r.all_events_link().endswith('/events_listing'))
-        
+
+        self.setRoles(['Manager'])
+        self.portal.invokeFactory('Folder', 'events')
+        r = self.renderer(assignment=events.Assignment(count=5))
+        self.failUnless(r.all_events_link().endswith('/events'))
+
     def test_prev_events_link(self):
         r = self.renderer(assignment=events.Assignment(count=5))
-        self.failUnless(r.prev_events_link().endswith(
-            '/events/aggregator/previous'))
+        if r.have_events_folder:
+            self.failUnless(r.prev_events_link().endswith(
+                '/events/aggregator/previous'))
 
+        # before we continue, we need administrator privileges
         self.loginAsPortalOwner()
-        self.portal._delObject('events')
+
+        if r.have_events_folder:
+            self.portal._delObject('events')
+            
         self.portal.invokeFactory('Folder', 'events')
         self.portal.events.invokeFactory('Folder', 'previous')
         r = self.renderer(assignment=events.Assignment(count=5))
