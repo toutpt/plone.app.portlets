@@ -8,7 +8,7 @@
 <li tal:define="show_children   node/show_children;
                 children        node/children;
                 item_url        node/getURL;
-                item_icon       node/item_icon;
+                item_type       python:'_'.join(node['portal_type'].split());
                 is_current      node/currentItem;
                 is_in_path      node/currentParent;
                 li_class        python:is_current and ' navTreeCurrentNode' or '';
@@ -23,8 +23,7 @@
 
         <a tal:attributes="href python:item_url;
                            title node/Description;
-                           class string:$item_class${li_class}${li_extr_class}${li_folder_class}">
-            <img tal:replace="structure item_icon/html_tag" />
+                           class string:$item_class${li_class}${li_extr_class}${li_folder_class} ${item_type}">
             <span tal:content="node/Title">Selected Item Title</span>
         </a>
 

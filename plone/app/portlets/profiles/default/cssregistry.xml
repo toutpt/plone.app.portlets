@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<object name="portal_css" meta_type="Stylesheets Registry">
+	<stylesheet id="content_types.css" enabled="on" rel="stylesheet" rendering="link" cacheable="True" compression="full" cookable="True"
+		expression="python:portal.portal_properties.site_properties.getProperty('icon_visibility') == 'enabled' or portal.portal_properties.site_properties.getProperty('icon_visibility') == 'authenticated' and not portal.portal_membership.isAnonymousUser()"
+	/>
+</object>

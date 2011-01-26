@@ -29,6 +29,7 @@ setup(name='plone.app.portlets',
         'feedparser',
         'five.customerize',
         'plone.app.layout >= 1.2dev',
+        'Products.Archetypes',
       ],
       entry_points="""
       # -*- Entry points: -*-
