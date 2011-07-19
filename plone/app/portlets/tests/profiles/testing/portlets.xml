@@ -8,6 +8,11 @@
         type="plone.app.portlets.tests.test_configuration.ITestColumn"
         />
 
+    <portletmanager
+        name="test.testcolumn2"
+        type="plone.app.portlets.tests.test_configuration.ITestColumn"
+        />
+
     <portlet
         addview="portlets.test.Test"
         title="Test portlet"
@@ -38,6 +43,7 @@
         key="/"
         type="portlets.test.Test"
         name="test.portlet2"
+        visible="0"
         insert-before="test.portlet1">
             <property name="test_text">Test prop 2</property>
             <property name="test_bool">True</property>
@@ -90,7 +96,7 @@
     <assignment name="navigation"
                 category="context"
                 key="/"
-                manager="plone.leftcolumn"
+                manager="test.testcolumn2"
                 type="portlets.Navigation">
         <property name="name"/>
         <property name="includeTop">False</property>

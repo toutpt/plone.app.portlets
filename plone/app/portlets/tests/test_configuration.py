@@ -27,6 +27,7 @@ from plone.portlets.interfaces import ILocalPortletAssignmentManager
 from plone.portlets.interfaces import IPortletType
 from plone.portlets.interfaces import IPortletRenderer
 from plone.portlets.interfaces import IPortletManager
+from plone.portlets.interfaces import IPortletAssignmentSettings
 
 from plone.portlets.constants import CONTEXT_CATEGORY
 from plone.portlets.constants import GROUP_CATEGORY
@@ -237,6 +238,17 @@ class TestGenericSetup(PortletsTestCase):
         self.assertEquals(None, assignment.test_text)
         self.assertEquals(None, assignment.test_bool)
         self.assertEquals(None, assignment.test_tuple)
+
+    def testAssignmentSettings(self):
+        mapping = assignment_mapping_from_key(self.portal,
+            manager_name=u"test.testcolumn", category=CONTEXT_CATEGORY, key="/")
+        assignment = mapping['test.portlet1']
+        settings = IPortletAssignmentSettings(assignment)
+        self.failUnless(settings.get('visible', True))
+
+        assignment = mapping['test.portlet2']
+        settings = IPortletAssignmentSettings(assignment)
+        self.failIf(settings.get('visible', True))
 
     def testAssignmentRoot(self):
         mapping = assignment_mapping_from_key(self.portal,
@@ -473,43 +485,54 @@ class TestGenericSetup(PortletsTestCase):
 <portlets>
  <portletmanager name="test.testcolumn"
     type="plone.app.portlets.tests.test_configuration.ITestColumn"/>
+ <portletmanager name="test.testcolumn2"
+    type="plone.app.portlets.tests.test_configuration.ITestColumn"/>
  <portlet title="Test portlet" addview="portlets.test.Test"
     description="A test portlet"/>
  <assignment name="test.portlet6" category="group" key="Reviewers"
-    manager="test.testcolumn" type="portlets.test.Test">
+    manager="test.testcolumn" type="portlets.test.Test" visible="True">
   <property name="test_bool"/>
   <property name="test_tuple"/>
   <property name="test_text"/>
  </assignment>
  <assignment name="test.portlet4" category="content_type" key="Folder"
-    manager="test.testcolumn" type="portlets.test.Test">
+    manager="test.testcolumn" type="portlets.test.Test" visible="True">
   <property name="test_bool"/>
   <property name="test_tuple"/>
   <property name="test_text"/>
  </assignment>
  <assignment name="test.portlet5" category="content_type" key="Folder"
-    manager="test.testcolumn" type="portlets.test.Test">
+    manager="test.testcolumn" type="portlets.test.Test" visible="True">
   <property name="test_bool"/>
   <property name="test_tuple"/>
   <property name="test_text"/>
  </assignment>
  <assignment name="test.portlet3" category="context" key="/"
-    manager="test.testcolumn" type="portlets.test.Test">
+    manager="test.testcolumn" type="portlets.test.Test" visible="True">
   <property name="test_bool"/>
   <property name="test_tuple"/>
   <property name="test_text"/>
  </assignment>
  <assignment name="test.portlet2" category="context" key="/"
-    manager="test.testcolumn" type="portlets.test.Test">
+    manager="test.testcolumn" type="portlets.test.Test" visible="False">
   <property name="test_bool">True</property>
   <property name="test_tuple"/>
   <property name="test_text">Test prop 2</property>
  </assignment>
  <assignment name="test.portlet1" category="context" key="/"
-    manager="test.testcolumn" type="portlets.test.Test">
+    manager="test.testcolumn" type="portlets.test.Test" visible="True">
   <property name="test_bool">False</property>
   <property name="test_tuple"/>
   <property name="test_text">Test pröp 1</property>
+ </assignment>
+ <assignment name="navigation" category="context" key="/"
+    manager="test.testcolumn2" type="portlets.Navigation" visible="True">
+  <property name="topLevel">0</property>
+  <property name="currentFolderOnly">False</property>
+  <property name="name"></property>
+  <property name="includeTop">False</property>
+  <property name="bottomLevel">0</property>
+  <property name="root"></property>
  </assignment>
  <blacklist category="user" location="/" manager="test.testcolumn"
     status="acquire"/>
@@ -518,6 +541,14 @@ class TestGenericSetup(PortletsTestCase):
  <blacklist category="content_type" location="/" manager="test.testcolumn"
     status="block"/>
  <blacklist category="context" location="/" manager="test.testcolumn"
+    status="acquire"/>
+ <blacklist category="user" location="/" manager="test.testcolumn2"
+    status="acquire"/>
+ <blacklist category="group" location="/" manager="test.testcolumn2"
+    status="acquire"/>
+ <blacklist category="content_type" location="/" manager="test.testcolumn2"
+    status="acquire"/>
+ <blacklist category="context" location="/" manager="test.testcolumn2"
     status="acquire"/>
 </portlets>
 """

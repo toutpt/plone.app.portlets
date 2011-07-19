@@ -68,8 +68,8 @@ class ManageContextualPortlets(BrowserView):
 
         return (left_slots or right_slots)
 
-    # view @@set-portlet-blacklist-status
-    def set_blacklist_status(self, manager, group_status, content_type_status, context_status):
+    # view @@set-inheritance-status
+    def set_inheritance_status(self, manager, group_status, content_type_status, context_status, inheritance_status=False):
         portletManager = getUtility(IPortletManager, name=manager)
         assignable = getMultiAdapter((self.context, portletManager,), ILocalPortletAssignmentManager)
         assignments = getMultiAdapter((self.context, portletManager), IPortletAssignmentMapping)
@@ -87,6 +87,7 @@ class ManageContextualPortlets(BrowserView):
         assignable.setBlacklistStatus(GROUP_CATEGORY, int2status(group_status))
         assignable.setBlacklistStatus(CONTENT_TYPE_CATEGORY, int2status(content_type_status))
         assignable.setBlacklistStatus(CONTEXT_CATEGORY, int2status(context_status))
+        assignable.setNoInheritSetting(int2status(inheritance_status))
 
         baseUrl = str(getMultiAdapter((self.context, self.request), name='absolute_url'))
         self.request.response.redirect(baseUrl + '/@@manage-portlets')

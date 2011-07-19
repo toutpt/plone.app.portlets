@@ -16,7 +16,7 @@
         Block/unblock portlets
     </h4>
 
-    <form method="post" tal:attributes="action view/blacklist_status_action">
+    <form method="post" tal:attributes="action view/inheritance_status_action">
 
       <input type="hidden" name="manager" tal:attributes="value view/manager_name" />
 
@@ -101,13 +101,33 @@
         </select>
       </div>
 
-      <div class="formControls">
+      <div tal:define="status view/no_inherit_setting">
+
+        <div class="field">
+          <input class="noborder" type="checkbox" name="inheritance_status:int"
+                 value="1"
+                 tal:attributes="checked python: status and 'checked' or None"
+                 />
+
+          <label for="inheritance" i18n:translate="">
+            Locally assigned only
+          </label>
+
+          <div class="formHelp" i18n:translate="">
+            Select this option to prevent children of this content
+            object from showing portlets created here.
+          </div>
+        </div>
+
+        <div class="formControls">
           <input class="context"
                  type="submit"
                  value="Save settings"
                  i18n:attributes="value label_save_settings"/>
+        </div>
       </div>
 
     </form>
+
   </div>
 </div>

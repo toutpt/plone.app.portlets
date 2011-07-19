@@ -30,6 +30,8 @@ from plone.app.portlets.browser.interfaces import IManageContextualPortletsView
 from plone.app.portlets.browser.interfaces import IManageDashboardPortletsView
 from plone.app.portlets.interfaces import IDashboard, IPortletPermissionChecker
 
+from plone.portlets.interfaces import IPortletAssignmentSettings
+
 class EditPortletManagerRenderer(Explicit):
     """Render a portlet manager in edit mode.
 
@@ -107,10 +109,15 @@ class EditPortletManagerRenderer(Explicit):
             # we get the contextual portlets view to access its utility methods
             view = queryMultiAdapter((context, self.request), name=self.__parent__.__name__)
             if view is not None:
-                assignments = view.getAssignmentsForManager(self.manager)
-                base_url = view.getAssignmentMappingUrl(self.manager)
-                data.extend(self.portlets_for_assignments(assignments, self.manager, base_url))
-                assignable = getMultiAdapter((context, self.manager), ILocalPortletAssignmentManager)
+                assignable = getMultiAdapter(
+                    (context, self.manager), ILocalPortletAssignmentManager)
+
+                if not assignable.getNoInheritSetting():
+                    assignments = view.getAssignmentsForManager(self.manager)
+                    base_url = view.getAssignmentMappingUrl(self.manager)
+                    data.extend(self.portlets_for_assignments(
+                        assignments, self.manager, base_url))
+
                 if assignable.getBlacklistStatus(CONTEXT_CATEGORY):
                     # Current context has blocked inherited portlets, stop.
                     break
@@ -137,6 +144,8 @@ class EditPortletManagerRenderer(Explicit):
                 dict(manager=manager.__name__, category=category,
                      key=key, name=name,))
 
+            settings = IPortletAssignmentSettings(assignments[idx])
+
             data.append({
                 'title'      : assignments[idx].title,
                 'editview'   : editviewName,
@@ -144,6 +153,9 @@ class EditPortletManagerRenderer(Explicit):
                 'up_url'     : '%s/@@move-portlet-up?name=%s' % (base_url, name),
                 'down_url'   : '%s/@@move-portlet-down?name=%s' % (base_url, name),
                 'delete_url' : '%s/@@delete-portlet?name=%s' % (base_url, name),
+                'hide_url'   : '%s/@@toggle-visibility?name=%s' % (base_url, name),
+                'show_url'   : '%s/@@toggle-visibility?name=%s' % (base_url, name),
+                'visible'    : settings.get('visible', True),
                 })
         if len(data) > 0:
             data[0]['up_url'] = data[-1]['down_url'] = None
@@ -216,12 +228,16 @@ class ContextualEditPortletManagerRenderer(EditPortletManagerRenderer):
     def __init__(self, context, request, view, manager):
         EditPortletManagerRenderer.__init__(self, context, request, view, manager)
 
-    def blacklist_status_action(self):
+    def inheritance_status_action(self):
         baseUrl = str(getMultiAdapter((self.context, self.request), name='absolute_url'))
-        return baseUrl + '/@@set-portlet-blacklist-status'
+        return baseUrl + '/@@set-inheritance-status'
 
     def manager_name(self):
         return self.manager.__name__
+
+    def no_inherit_setting(self):
+        assignable = getMultiAdapter((self.context, self.manager,), ILocalPortletAssignmentManager)
+        return assignable.getNoInheritSetting()
 
     def context_blacklist_status(self):
         assignable = getMultiAdapter((self.context, self.manager,), ILocalPortletAssignmentManager)
@@ -289,3 +305,11 @@ class ManagePortletAssignments(BrowserView):
             url = str(getMultiAdapter((context, self.request), name=u"absolute_url"))
             referer = '%s/@@manage-portlets' % (url,)
         return referer
+
+    def toggle_visibility(self, name):
+        assignments = aq_inner(self.context)
+        settings = IPortletAssignmentSettings(assignments[name])
+        visible = settings.get('visible', True)
+        settings['visible'] = not visible
+        self.request.response.redirect(self._nextUrl())
+        return ''

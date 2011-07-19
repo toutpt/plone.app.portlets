@@ -74,8 +74,8 @@
         />
 
       <browser:page
-        name="set-portlet-blacklist-status"
-        attribute="set_blacklist_status"
+        name="set-inheritance-status"
+        attribute="set_inheritance_status"
         />
 
     </browser:pages>
@@ -139,6 +139,11 @@
       <browser:page
         name="move-portlet-down"
         attribute="move_portlet_down"
+        />
+
+      <browser:page
+        name="toggle-visibility"
+        attribute="toggle_visibility"
         />
 
     </browser:pages>
@@ -212,6 +217,14 @@
         name="inlineDeletePortlet"
         class=".kss.PortletManagerKSS"
         attribute="delete_portlet"
+        permission="plone.app.portlets.ManageOwnPortlets"
+        />
+
+    <browser:page
+        for="*"
+        name="togglePortletVisibility"
+        class=".kss.PortletManagerKSS"
+        attribute="toggle_visibility"
         permission="plone.app.portlets.ManageOwnPortlets"
         />
 
