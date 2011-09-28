@@ -73,8 +73,8 @@
         />
 
       <browser:page
-        name="set-portlet-blacklist-status"
-        attribute="set_blacklist_status"
+        name="set-inheritance-status"
+        attribute="set_inheritance_status"
         />
 
     </browser:pages>

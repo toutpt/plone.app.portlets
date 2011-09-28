@@ -92,12 +92,10 @@ class EditPortletManagerRenderer(Explicit):
     def baseUrl(self):
         return self.__parent__.getAssignmentMappingUrl(self.manager)
 
-
     def portlets(self):
         assignments = self._lazyLoadAssignments(self.manager)
         return self.portlets_for_assignments(
             assignments, self.manager, self.baseUrl())
-
 
     def portlets_for_assignments(self, assignments, manager, base_url):
         category = self.__parent__.category
@@ -208,12 +206,16 @@ class ContextualEditPortletManagerRenderer(EditPortletManagerRenderer):
     def __init__(self, context, request, view, manager):
         EditPortletManagerRenderer.__init__(self, context, request, view, manager)
 
-    def blacklist_status_action(self):
+    def inheritance_status_action(self):
         baseUrl = str(getMultiAdapter((self.context, self.request), name='absolute_url'))
-        return baseUrl + '/@@set-portlet-blacklist-status'
+        return baseUrl + '/@@set-inheritance-status'
 
     def manager_name(self):
         return self.manager.__name__
+
+    def local_assignment_setting(self):
+        assignable = getMultiAdapter((self.context, self.manager,), ILocalPortletAssignmentManager)
+        return assignable.getLocalAssignment()
 
     def context_blacklist_status(self):
         assignable = getMultiAdapter((self.context, self.manager,), ILocalPortletAssignmentManager)
@@ -279,15 +281,30 @@ class ContextualEditPortletManagerRenderer(EditPortletManagerRenderer):
                 context = context.__parent__
 
             # we get the contextual portlets view to access its utility methods
-            view = queryMultiAdapter((context, self.request), name=self.__parent__.__name__)
-            if view is not None:
-                assignments = view.getAssignmentsForManager(self.manager)
-                is_visible = lambda a: IPortletAssignmentSettings(a).get('visible', True)
-                assignments_to_show = [a for a in assignments if is_visible(a)]
-                base_url = view.getAssignmentMappingUrl(self.manager)
-                data.extend(self.portlets_for_assignments(assignments_to_show, self.manager, base_url))
+            view = queryMultiAdapter(
+                (context, self.request), name=self.__parent__.__name__
+                )
 
-            assignable = getMultiAdapter((context, self.manager), ILocalPortletAssignmentManager)
+            assignable = getMultiAdapter(
+                (context, self.manager), ILocalPortletAssignmentManager
+                )
+
+            if view is not None:
+                if not assignable.getLocalAssignment():
+                    assignments = view.getAssignmentsForManager(self.manager)
+                    is_visible = lambda a: IPortletAssignmentSettings(a).\
+                                 get('visible', True)
+                    base_url = view.getAssignmentMappingUrl(self.manager)
+
+                    assignments_to_show = [
+                        a for a in assignments if is_visible(a)
+                        ]
+
+                    data.extend(
+                        self.portlets_for_assignments(
+                            assignments_to_show, self.manager, base_url
+                            ))
+
             if assignable.getBlacklistStatus(CONTEXT_CATEGORY):
                 # Current context has blocked inherited portlets, stop.
                 break

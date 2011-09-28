@@ -1,6 +1,17 @@
 Changelog
 =========
 
+In next feature release ...
+
+- Added a setting "Local assignment only" which if selected prevents
+  the inheritance of the assigned portlets to children (PLIP #12024).
+
+  Note that this includes a default page (also a child object). An
+  instruction is provided in the edit context manager screen to notify
+  the user of this.
+  [malthe]
+
+
 2.2.2 - Unreleased
 ------------------
 
@@ -20,7 +31,7 @@ Changelog
 ------------------
 - Imporove tests readability. Merged from branches/2.1
   [gotcha]
-  
+
 - 'placeholder' attribute for the search portlet's field instead of the custom
   JS handling of the same functionality.
   [spliter]
@@ -31,13 +42,12 @@ Changelog
 - Updated 'Advanced Search' link and form's action of the search portlet to
   link to updated search results view at @@search.
   [spliter]
-  
+
 2.1.5 - 2011-06-19
 ------------------
 
 - Fixed i18n regression caused by the pep8 cleanup.
   [vincentfretin]
-
 
 2.1.4 - 2011-05-11
 ------------------
