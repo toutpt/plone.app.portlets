@@ -1,5 +1,7 @@
 import logging
 
+from time import time
+
 from plone.memoize.view import memoize
 
 from plone.portlets.constants import CONTEXT_CATEGORY
@@ -134,8 +136,8 @@ class EditPortletManagerRenderer(Explicit):
                 'up_url'     : '%s/@@move-portlet-up?name=%s' % (base_url, name),
                 'down_url'   : '%s/@@move-portlet-down?name=%s' % (base_url, name),
                 'delete_url' : '%s/@@delete-portlet?name=%s' % (base_url, name),
-                'hide_url'   : '%s/@@toggle-visibility?name=%s' % (base_url, name),
-                'show_url'   : '%s/@@toggle-visibility?name=%s' % (base_url, name),
+                'hide_url'   : '%s/@@toggle-visibility?name=%s&action=hide&time=%s' % (base_url, name, str(time())),
+                'show_url'   : '%s/@@toggle-visibility?name=%s&action=show&time=%s' % (base_url, name, str(time())),
                 'visible'    : visible,
                 })
         if len(data) > 0:
